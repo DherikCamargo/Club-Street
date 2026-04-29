@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!-- Para usar no Google Apps Script, troque os caminhos das imagens por URLs públicas (Drive, Cloudinary, GitHub Raw, etc.). -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Club Street</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">Club Street</div>
+      <div class="nav-mini">
+        <a class="mini-btn" href="#catalogo">Catálogo</a>
+        <a class="mini-btn" href="#como-comprar">Como comprar</a>
+        <a class="mini-btn" href="#medidas">Tabela de medidas</a>
+        <a class="mini-btn" href="https://www.instagram.com/streetclub_oficial?igsh=ZDd1NTczM2UyMjZr" target="_blank" rel="noopener">@streetclub_oficial</a>
+      </div>
+    </div>
+  </div>
+
+  <section class="hero">
+    <div class="hero-card">
+      <span class="eyebrow">Streetwear autoral</span>
+      <h1>Club Street</h1>
+      <p>Escolha sua camiseta, selecione a cor e o tamanho, e envie seu pedido direto pelo WhatsApp. </p>
+      
+      <div class="hero-product-details">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-icon">◌</div>
+            <div class="detail-text">
+              <strong>Fácil lavagem</strong>
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-icon">⌁</div>
+            <div class="detail-text">
+              <strong>Fibra natural</strong>
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-icon">◍</div>
+            <div class="detail-text">
+              <strong>Regulação térmica</strong>
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-icon">≈</div>
+            <div class="detail-text">
+              <strong>Tecido respirável</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="spec-grid">
+          <div class="spec-item">
+            <span class="spec-label">Gramatura</span>
+            <strong>160g/m²</strong>
+          </div>
+          <div class="spec-divider"></div>
+          <div class="spec-item">
+            <span class="spec-label">Material</span>
+            <strong>100% Algodão</strong>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="hero-side">
+      <div class="stat">
+        <strong>Entrega grátis para todo o Brasil</strong>
+        <span>Frete grátis informado na vitrine da marca.</span>
+      </div>
+      <div class="stat">
+        <strong>Prazo de envio: 1 dia útil</strong>
+        <span>Pedido aprovado e separado rapidamente para despacho.</span>
+      </div>
+      <div class="stat">
+        <strong>Pedido direto no WhatsApp</strong>
+        <span>Escolheu cor e tamanho? Toque em Enviar e finalize o atendimento.</span>
+      </div>
+    </div>
+  </section>
+  <div id="catalogo" class="catalog-header">
+    <h2>Catálogo de camisetas</h2>
+    <p>Nosso estilo, sua estampa.</p>
+  </div>
+
+  <div class="container">
+    <section class="grid">
+      
+      <article class="card">
+        <button class="image-button" type="button" onclick="openProduct('snipe')">
+          <img src="assets/img_001.png" alt="Camiseta Snipe">
+        </button>
+        <div class="info">
+          <h3>Camiseta Snipe</h3>
+          <p class="price">R$ 69,90</p>
+        </div>
+      </article>
+    
+      <article class="card">
+        <button class="image-button" type="button" onclick="openProduct('anjo')">
+          <img src="assets/img_002.png" alt="Camiseta Anjo">
+        </button>
+        <div class="info">
+          <h3>Camiseta Anjo</h3>
+          <p class="price">R$ 69,90</p>
+        </div>
+      </article>
+    
+      <article class="card">
+        <button class="image-button" type="button" onclick="openProduct('peace')">
+          <img src="assets/img_003.png" alt="Camiseta Peace">
+        </button>
+        <div class="info">
+          <h3>Camiseta Peace</h3>
+          <p class="price">R$ 69,90</p>
+        </div>
+      </article>
+    
+    
+      <article class="card">
+        <button class="image-button" type="button" onclick="openProduct('rosa')">
+          <img src="assets/img_004.png" alt="Camiseta Rosa" />
+        </button>
+        <div class="info">
+          <h3>Camiseta Rosa</h3>
+          <p class="price">R$ 69,90</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <button class="image-button" type="button" onclick="openProduct('never')">
+          <img src="assets/img_005.png" alt="Camiseta Never" />
+        </button>
+        <div class="info">
+          <h3>Camiseta Never</h3>
+          <p class="price">R$ 69,90</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <button class="image-button" type="button" onclick="openProduct('creeping')">
+          <img src="assets/img_006.png" alt="Camiseta Creeping" />
+        </button>
+        <div class="info">
+          <h3>Camiseta Creeping</h3>
+          <p class="price">R$ 69,90</p>
+        </div>
+      </article>
+</section>
+  </div>
+
+  
+  </div>
+
+  <section id="medidas" class="measure-box">
+    <h3>Tabela de medidas</h3>
+    <p>Compare as medidas com uma peça sua para escolher o tamanho ideal. Pode haver variações de até 1 cm ou 2 cm na costura.</p>
+    <div class="measure-placeholder" style="border-style: solid; padding: 16px; background: #ffffff; min-height: auto;">
+      <img src="assets/img_007.png" alt="Tabela de medidas Camiseta Básica Masculina" style="max-width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 14px;" />
+    </div>
+  </section>
+
+  <section class="cta-box">
+    <h3>Atendimento rápido</h3>
+    <p>Para pedir sua camiseta, basta abrir o produto, escolher a cor, selecionar o tamanho e tocar em Enviar.</p>
+    <div class="hero-actions" style="margin-top:14px;">
+      <a class="btn-primary" href="https://wa.me/5516994451494" target="_blank" rel="noopener">Falar no WhatsApp</a>
+      <a class="btn-secondary" href="https://www.instagram.com/streetclub_oficial?igsh=ZDd1NTczM2UyMjZr" target="_blank" rel="noopener">Instagram da marca</a>
+    </div>
+  </section>
+
+  <div class="footer">
+    Club Street • Envio em 1 dia útil • Entrega grátis para todo o Brasil
+  </div>
+
+  <a class="floating-wa" href="https://wa.me/5516994451494" target="_blank" rel="noopener">WhatsApp</a>
+
+  <div id="modal" class="modal" onclick="outsideClose(event)">
+
+    <div class="modal-shell">
+      <button class="close" onclick="closeModal()" aria-label="Fechar">&times;</button>
+      <div class="modal-inner">
+        <div class="preview-area">
+          <img id="modalImage" src="" alt="">
+        </div>
+        <div class="details-area">
+          <h2 id="productTitle" class="product-title"></h2>
+          <p id="productPrice" class="product-price"></p>
+
+          <div class="section-title">Cor</div>
+          <div id="currentColor" class="current-selection"></div>
+          <div id="swatches" class="swatches"></div>
+          <div id="swatchLabels" class="swatch-labels"></div>
+
+          <div class="section-title">Tamanho</div>
+          <div id="currentSize" class="current-selection">Tamanho selecionado: P</div>
+          <div id="sizes" class="sizes"></div>
+
+          <p class="helper-text">
+            Clique em uma cor para trocar a imagem principal. Depois selecione o tamanho desejado entre P e GG.
+          </p>
+          <button id="sendButton" class="send-btn" onclick="sendToWhatsApp()">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
