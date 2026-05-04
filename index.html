@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Club Street</title>
+
+  <!-- ✅ MELHORIA TÉCNICA: Meta description e Open Graph -->
+  <meta name="description" content="Club Street – Camisetas premium com entrega grátis para todo o Brasil. Pedido direto no WhatsApp." />
+  <meta property="og:title" content="Club Street" />
+  <meta property="og:description" content="Camisetas premium com entrega grátis para todo o Brasil. Pedido direto no WhatsApp." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/DherikCamargo/Club-Street/main/img_001.png" />
+  <meta name="theme-color" content="#111111" />
+
+  <style>
+    * { box-sizing: border-box; }
+    :root { --bg:#111; --muted:#b8b8b8; --green:#25D366; --green-dark:#1da851; }
+    body { margin:0; font-family:Arial, Helvetica, sans-serif; background:#111; color:#fff; line-height:1.4; }
+
+    /* ── TOPBAR ── */
+    .topbar { position:sticky; top:0; z-index:50; backdrop-filter:blur(10px); background:rgba(17,17,17,.92); border-bottom:1px solid #232323; }
+    .topbar-inner { max-width:1300px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .brand { font-size:1.2rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    .mini-btn { padding:10px 14px; border:1px solid #25D366; border-radius:999px; color:#fff; font-size:.92rem; text-decoration:none; transition:background .2s; }
+    .mini-btn:hover { background:#25D366; }
+
+    /* ── HERO ── */
+    .hero {
+      max-width:1300px; margin:0 auto; padding:40px 20px 24px;
+      display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px;
+    }
+    .hero-tag {
+      display:inline-block; padding:4px 14px; border:1px solid #25D366; border-radius:999px;
+      color:#25D366; font-size:.8rem; letter-spacing:.12em; text-transform:uppercase;
+    }
+    .hero h1 { margin:0; font-size:clamp(2rem, 6vw, 3.4rem); font-weight:900; letter-spacing:-.02em; line-height:1.1; }
+    .hero p { margin:0; color:var(--muted); font-size:1rem; max-width:480px; }
+    .hero-cta {
+      margin-top:6px; display:inline-flex; align-items:center; gap:8px;
+      padding:13px 26px; background:#25D366; border-radius:999px;
+      color:#fff; font-weight:700; text-decoration:none; font-size:.95rem;
+      transition:background .2s, transform .15s;
+    }
+    .hero-cta:hover { background:var(--green-dark); transform:translateY(-2px); }
+
+    /* ── CATALOG ── */
+    .catalog-header { max-width:1300px; margin:0 auto; padding:0 20px 10px; }
+    .catalog-header h2 { font-size:1rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0; }
+    .container { max-width:1300px; margin:0 auto; padding:10px 20px 20px; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+
+    /* ── CARD ── */
+    .card { background:#1a1a1a; border:1px solid #2b2b2b; border-radius:18px; overflow:hidden; display:flex; flex-direction:column; }
+    .image-button { display:block; width:100%; border:0; padding:0; background:#000; cursor:pointer; position:relative; overflow:hidden; }
+    .image-button img { width:100%; height:210px; object-fit:cover; display:block; transition:transform .35s ease; }
+    .image-button:hover img { transform:scale(1.04); }
+    /* ✅ MELHORIA UX: overlay "Ver produto" */
+    .image-button::after {
+      content:'Ver produto';
+      position:absolute; bottom:0; left:0; right:0;
+      padding:12px; background:linear-gradient(transparent,rgba(0,0,0,.75));
+      color:#fff; font-size:.85rem; font-weight:700; letter-spacing:.06em;
+      text-transform:uppercase; opacity:0; transition:opacity .25s;
+      pointer-events:none;
+    }
+    .image-button:hover::after, .image-button:focus::after { opacity:1; }
+    .info { padding:14px 16px 18px; text-align:center; display:flex; flex-direction:column; gap:10px; flex:1; }
+    .info h3 { margin:0; font-size:.98rem; }
+    .price { margin:0; font-size:1.05rem; font-weight:bold; color:#f0f0f0; }
+    /* ✅ MELHORIA UX: botão visível no card */
+    .card-btn {
+      width:100%; padding:10px; border:1px solid #333; border-radius:10px;
+      background:transparent; color:#fff; font-size:.88rem; font-weight:600;
+      cursor:pointer; transition:background .2s, border-color .2s;
+    }
+    .card-btn:hover { background:#222; border-color:#555; }
+
+    /* ── MODAL ── */
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.88); align-items:center; justify-content:center; padding:24px; z-index:9999; }
+    .modal.active { display:flex; }
+    .modal-shell { width:min(1100px,96vw); max-height:92vh; overflow:auto; background:#151515; border:1px solid #2b2b2b; border-radius:22px; position:relative; }
+    .modal-inner { display:grid; grid-template-columns:1.2fr .8fr; }
+    .preview-area { padding:18px; background:#0e0e0e; border-right:1px solid #262626; display:flex; flex-direction:column; gap:14px; }
+    .preview-area img { width:100%; border-radius:16px; }
+
+    /* ✅ MELHORIA UX: link para guia de medidas dentro do modal */
+    .measure-link {
+      display:inline-flex; align-items:center; gap:6px;
+      color:var(--muted); font-size:.82rem; text-decoration:none;
+      border:1px solid #2c2c2c; border-radius:8px; padding:8px 12px;
+      transition:border-color .2s, color .2s;
+    }
+    .measure-link:hover { border-color:#555; color:#fff; }
+
+    .details-area { padding:26px 22px 22px; }
+    .swatches { display:flex; flex-wrap:wrap; gap:10px; }
+    .swatch { width:34px; height:34px; border-radius:10px; border:2px solid #444; cursor:pointer; transition:transform .15s; }
+    .swatch:hover { transform:scale(1.12); }
+    .swatch.active { border-color:#fff; }
+    .swatch.light { border-color:#999; }
+    .sizes { display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; }
+    .size-btn { min-width:54px; padding:10px 14px; border-radius:10px; background:#202020; border:1px solid #3a3a3a; color:#fff; cursor:pointer; font-weight:700; transition:background .15s; }
+    .size-btn:hover:not(.active) { background:#2a2a2a; }
+    .size-btn.active { background:#fff; color:#000; }
+    .send-btn { width:100%; margin-top:18px; padding:14px; border:0; border-radius:12px; background:#25D366; color:#fff; font-weight:700; cursor:pointer; font-size:1rem; transition:background .2s, transform .15s; }
+    .send-btn:hover { background:var(--green-dark); transform:translateY(-1px); }
+    .close { position:absolute; top:12px; right:12px; width:38px; height:38px; border:0; border-radius:50%; background:#fff; color:#000; font-size:24px; cursor:pointer; line-height:1; }
+
+    /* ── SHIPPING ── */
+    .shipping-box { max-width:1300px; margin:0 auto; padding:20px; display:grid; gap:14px; }
+    .shipping-card { background:#181818; border:1px solid #2c2c2c; border-radius:18px; padding:18px; }
+    .shipping-card strong { display:block; font-size:1.05rem; margin-bottom:6px; }
+    .shipping-card span { color:var(--muted); }
+
+    /* ── GUIA DE MEDIDAS ── */
+    .measure-box { max-width:1300px; margin:0 auto; padding:20px; }
+
+    /* ── FOOTER ── */
+    .footer { max-width:1300px; margin:0 auto; padding:20px; color:var(--muted); font-size:.88rem; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:860px) {
+      .modal-inner { grid-template-columns:1fr; }
+      .preview-area { border-right:none; border-bottom:1px solid #262626; }
+      .image-button img { height:180px; }
+      /* Em mobile mostra sempre o label "Ver produto" sem hover */
+      .image-button::after { opacity:1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">Club Street</div>
+      <div>
+        <a class="mini-btn" href="https://wa.me/5516994451494" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ MELHORIA UX: Hero / apresentação da marca -->
+  <section class="hero">
+    <span class="hero-tag">Frete grátis • Todo o Brasil</span>
+    <h1>Estilo que fala<br>por você</h1>
+    <p>Camisetas premium com designs exclusivos. Escolha sua peça e peça direto no WhatsApp.</p>
+    <a class="hero-cta" href="https://wa.me/5516994451494" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.528 5.847L0 24l6.335-1.652A11.954 11.954 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.006-1.373l-.36-.213-3.727.977.994-3.634-.234-.373A9.818 9.818 0 0 1 2.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg>
+      Falar no WhatsApp
+    </a>
+  </section>
+
+  <!-- CATÁLOGO -->
+  <div class="catalog-header"><h2>Coleção</h2></div>
+  <div class="container">
+    <section class="grid" id="catalogGrid"></section>
+  </div>
+
+  <!-- SHIPPING -->
+  <section class="shipping-box">
+    <div class="shipping-card">
+      <strong>Entrega grátis para todo o Brasil • Envio em até 1 dia útil</strong>
+      <span>Frete grátis e separação rápida após aprovação do pedido.</span>
+    </div>
+    <div class="shipping-card">
+      <strong>Pedido direto no WhatsApp</strong>
+      <span>Escolheu cor e tamanho? Toque em Enviar e finalize o atendimento.</span>
+    </div>
+  </section>
+
+  <!-- GUIA DE MEDIDAS -->
+  <section id="medidas" class="measure-box">
+    <h3>Guia de medidas</h3>
+    <p>Compare as medidas com uma peça sua para escolher o tamanho ideal.</p>
+    <!-- ✅ MELHORIA TÉCNICA: lazy loading -->
+    <img
+      src="https://raw.githubusercontent.com/DherikCamargo/Club-Street/main/img_007.png"
+      alt="Guia de medidas"
+      loading="lazy"
+      style="max-width:100%;border-radius:12px;border:1px solid #2b2b2b;"
+    />
+  </section>
+
+  <div class="footer">Club Street • Envio em 1 dia útil • Entrega grátis para todo o Brasil</div>
+
+  <!-- MODAL -->
+  <div id="modal" class="modal" onclick="outsideClose(event)">
+    <div class="modal-shell">
+      <button class="close" onclick="closeModal()" aria-label="Fechar">&times;</button>
+      <div class="modal-inner">
+        <div class="preview-area">
+          <!-- ✅ MELHORIA TÉCNICA: lazy loading na imagem do modal -->
+          <img id="modalImage" src="" alt="" loading="lazy">
+          <!-- ✅ MELHORIA UX: link para guia de medidas dentro do modal -->
+          <a class="measure-link" href="#medidas" onclick="closeModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2l10 10-10 10"/></svg>
+            Ver guia de medidas
+          </a>
+        </div>
+        <div class="details-area">
+          <h2 id="productTitle"></h2>
+          <p id="productPrice"></p>
+          <div>Cor</div>
+          <div id="currentColor"></div>
+          <div id="swatches" class="swatches"></div>
+          <div style="margin-top:14px;">Tamanho</div>
+          <div id="currentSize">Tamanho selecionado: P</div>
+          <div id="sizes" class="sizes"></div>
+          <button id="sendButton" class="send-btn" onclick="sendToWhatsApp()">Enviar pedido no WhatsApp</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var BASE = 'https://raw.githubusercontent.com/DherikCamargo/Club-Street/main/';
+    var PRODUCTS = [
+      { id:'snipe', title:'Camiseta Snipe', price:'R$ 69,90', defaultColor:'Preta', sizes:['P','M','G','GG'], colors:[
+        {name:'Preta',     hex:'#111111', image:BASE+'img_001.png'},
+        {name:'Bordô',     hex:'#6A1832', image:BASE+'img_008.png'},
+        {name:'Off White', hex:'#ECE7DE', image:BASE+'img_009.png'},
+        {name:'Branca',    hex:'#FFFFFF', image:BASE+'img_010.png'}
+      ]},
+      { id:'anjo', title:'Camiseta Anjo', price:'R$ 69,90', defaultColor:'Azul Marinho', sizes:['P','M','G','GG'], colors:[
+        {name:'Azul Marinho', hex:'#162544', image:BASE+'img_002.png'},
+        {name:'Bordô',        hex:'#6A1832', image:BASE+'img_011.png'},
+        {name:'Preta',        hex:'#111111', image:BASE+'img_012.png'}
+      ]},
+      { id:'peace', title:'Camiseta Peace', price:'R$ 69,90', defaultColor:'Bordô', sizes:['P','M','G','GG'], colors:[
+        {name:'Bordô',        hex:'#6A1832', image:BASE+'img_003.png'},
+        {name:'Preta',        hex:'#111111', image:BASE+'img_013.png'},
+        {name:'Azul Marinho', hex:'#162544', image:BASE+'img_014.png'}
+      ]},
+      { id:'rosa', title:'Camiseta Rosa', price:'R$ 69,90', defaultColor:'Off White', sizes:['P','M','G','GG'], colors:[
+        {name:'Off White',    hex:'#ECE7DE', image:BASE+'img_004.png'},
+        {name:'Preta',        hex:'#111111', image:BASE+'img_015.png'},
+        {name:'Branca',       hex:'#FFFFFF', image:BASE+'img_016.png'},
+        {name:'Azul Marinho', hex:'#1F2E46', image:BASE+'img_017.png'}
+      ]},
+      { id:'never', title:'Camiseta Never', price:'R$ 69,90', defaultColor:'Verde Escuro', sizes:['P','M','G','GG'], colors:[
+        {name:'Verde Escuro', hex:'#1E382A', image:BASE+'img_005.png'},
+        {name:'Off White',    hex:'#ECE7DE', image:BASE+'img_018.png'},
+        {name:'Bordô',        hex:'#6A1832', image:BASE+'img_019.png'},
+        {name:'Preta',        hex:'#111111', image:BASE+'img_020.png'},
+        {name:'Branca',       hex:'#FFFFFF', image:BASE+'img_021.png'},
+        {name:'Azul Marinho', hex:'#1F2E46', image:BASE+'img_022.png'}
+      ]},
+      { id:'creeping', title:'Camiseta Creeping', price:'R$ 69,90', defaultColor:'Off White', sizes:['P','M','G','GG'], colors:[
+        {name:'Off White',    hex:'#ECE7DE', image:BASE+'img_006.png'},
+        {name:'Bordô',        hex:'#6B1F2B', image:BASE+'img_023.png'},
+        {name:'Preta',        hex:'#111111', image:BASE+'img_024.png'},
+        {name:'Azul Marinho', hex:'#1E2F4F', image:BASE+'img_025.png'}
+      ]},
+      { id:'classic', title:'Camiseta Classic', price:'R$ 69,90', defaultColor:'Preta', sizes:['P','M','G','GG'], colors:[
+        // ✅ BUG CORRIGIDO: era 'assetsimg_026.png.png' → corrigido para 'img_026.png'
+        {name:'Preta',     hex:'#111111', image:BASE+'img_026.png'},
+        {name:'Branca',    hex:'#FFFFFF', image:BASE+'img_010.png'},
+        {name:'Off White', hex:'#ECE7DE', image:BASE+'img_009.png'}
+      ]},
+      { id:'staypositive', title:'Camiseta Stay Positive', price:'R$ 69,90', defaultColor:'Preta', sizes:['P','M','G','GG'], colors:[
+        {name:'Preta',        hex:'#111111', image:BASE+'img_026.png'},
+        {name:'Off White',    hex:'#ECE7DE', image:BASE+'img_027.png'},
+        {name:'Bordô',        hex:'#6A1832', image:BASE+'img_028.png'},
+        {name:'Azul Marinho', hex:'#162544', image:BASE+'img_029.png'}
+      ]}
+    ];
+
+    var modal       = document.getElementById('modal');
+    var modalImage  = document.getElementById('modalImage');
+    var productTitle= document.getElementById('productTitle');
+    var productPrice= document.getElementById('productPrice');
+    var swatchesEl  = document.getElementById('swatches');
+    var sizesEl     = document.getElementById('sizes');
+    var currentColorEl = document.getElementById('currentColor');
+    var currentSizeEl  = document.getElementById('currentSize');
+
+    var WHATSAPP_NUMBER = '5516994451494';
+    var currentProduct  = null;
+    var selectedColor   = null;
+    var selectedSize    = 'P';
+
+    // ── Catálogo ──────────────────────────────────────────────
+    function renderCatalog() {
+      var grid = document.getElementById('catalogGrid');
+      grid.innerHTML = '';
+      PRODUCTS.forEach(function(p) {
+        var img = (p.colors && p.colors[0] && p.colors[0].image) || '';
+        var article = document.createElement('article');
+        article.className = 'card';
+        article.innerHTML =
+          '<button class="image-button" type="button" aria-label="Ver ' + p.title + '">' +
+            /* ✅ MELHORIA TÉCNICA: lazy loading nas imagens do catálogo */
+            '<img src="' + img + '" alt="' + p.title + '" loading="lazy">' +
+          '</button>' +
+          '<div class="info">' +
+            '<h3>' + p.title + '</h3>' +
+            '<p class="price">' + p.price + '</p>' +
+            /* ✅ MELHORIA UX: botão visível no card */
+            '<button class="card-btn" type="button">Escolher cor e tamanho</button>' +
+          '</div>';
+
+        // Evento no botão da imagem
+        article.querySelector('.image-button').addEventListener('click', function() {
+          openProduct(p.id);
+        });
+        // Evento no botão do card
+        article.querySelector('.card-btn').addEventListener('click', function() {
+          openProduct(p.id);
+        });
+
+        grid.appendChild(article);
+      });
+    }
+
+    // ── Modal ──────────────────────────────────────────────────
+    function openProduct(productId) {
+      currentProduct = PRODUCTS.find(function(p) { return p.id === productId; });
+      if (!currentProduct) return;
+      selectedColor = currentProduct.defaultColor;
+      selectedSize  = 'P';
+      renderModal();
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // ✅ MELHORIA TÉCNICA: renderModal otimizado — atualiza só o que muda
+    function renderModal() {
+      var colorData = currentProduct.colors.find(function(c) { return c.name === selectedColor; })
+                      || currentProduct.colors[0];
+
+      // Atualiza apenas os campos que mudam
+      productTitle.textContent    = currentProduct.title;
+      productPrice.textContent    = currentProduct.price;
+      modalImage.src              = colorData.image;
+      modalImage.alt              = currentProduct.title + ' – ' + colorData.name;
+      currentColorEl.textContent  = 'Cor selecionada: ' + colorData.name;
+      currentSizeEl.textContent   = 'Tamanho selecionado: ' + selectedSize;
+
+      // Swatches — recria só se o produto mudou (evita rebuild desnecessário)
+      if (swatchesEl.dataset.product !== currentProduct.id) {
+        swatchesEl.dataset.product = currentProduct.id;
+        swatchesEl.innerHTML = '';
+        currentProduct.colors.forEach(function(c) {
+          var b = document.createElement('button');
+          b.className = 'swatch' + (c.name === selectedColor ? ' active' : '');
+          if (['#FFFFFF','#ECE7DE','#F5F5F5','#FFF'].indexOf((c.hex || '').toUpperCase()) !== -1) {
+            b.classList.add('light');
+          }
+          b.style.background = c.hex;
+          b.title = c.name;
+          b.setAttribute('aria-label', c.name);
+          b.addEventListener('click', function() { selectedColor = c.name; renderModal(); });
+          swatchesEl.appendChild(b);
+        });
+      } else {
+        // Só atualiza a classe active dos swatches existentes
+        Array.from(swatchesEl.children).forEach(function(b, i) {
+          var c = currentProduct.colors[i];
+          b.className = 'swatch' + (c && c.name === selectedColor ? ' active' : '');
+          if (c && ['#FFFFFF','#ECE7DE','#F5F5F5','#FFF'].indexOf((c.hex || '').toUpperCase()) !== -1) {
+            b.classList.add('light');
+          }
+        });
+      }
+
+      // Sizes — recria só se o produto mudou
+      if (sizesEl.dataset.product !== currentProduct.id) {
+        sizesEl.dataset.product = currentProduct.id;
+        sizesEl.innerHTML = '';
+        currentProduct.sizes.forEach(function(s) {
+          var b = document.createElement('button');
+          b.className = 'size-btn' + (s === selectedSize ? ' active' : '');
+          b.textContent = s;
+          b.addEventListener('click', function() { selectedSize = s; renderModal(); });
+          sizesEl.appendChild(b);
+        });
+      } else {
+        // Só atualiza a classe active dos tamanhos
+        Array.from(sizesEl.children).forEach(function(b) {
+          b.className = 'size-btn' + (b.textContent === selectedSize ? ' active' : '');
+        });
+      }
+    }
+
+    function sendToWhatsApp() {
+      if (!currentProduct) return;
+      var msg = 'Olá, quero a ' + currentProduct.title + ', cor ' + selectedColor + ', tamanho ' + selectedSize + '.';
+      window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
+    }
+
+    function closeModal() {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      // Reseta o cache de produto do modal para forçar rebuild no próximo produto diferente
+      swatchesEl.dataset.product = '';
+      sizesEl.dataset.product    = '';
+    }
+
+    function outsideClose(e) { if (e.target === modal) closeModal(); }
+
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+    renderCatalog();
+  </script>
+</body>
+</html>
