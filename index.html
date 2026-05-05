@@ -94,8 +94,10 @@
     .order-card-hdr { padding:14px 16px; border-bottom:1px solid #222; display:flex; align-items:center; justify-content:space-between; }
     .order-card-hdr strong { font-size:.85rem; color:var(--muted); }
     .order-status { font-size:.75rem; font-weight:700; padding:4px 10px; border-radius:999px; }
-    .order-status.approved { background:#1a3a2a; color:#25D366; }
-    .order-status.pending { background:#3a3010; color:#f5c518; }
+    .order-status.approved  { background:#1a3a2a; color:#25D366; }
+    .order-status.pending   { background:#3a3010; color:#f5c518; }
+    .order-status.shipped   { background:#102a3a; color:#009ee3; }
+    .order-status.delivered { background:#1a1a3a; color:#a78bfa; }
     .order-items { padding:12px 16px; display:flex; flex-direction:column; gap:10px; }
     .order-item { display:flex; gap:10px; align-items:center; }
     .order-item img { width:52px; height:52px; border-radius:8px; object-fit:cover; flex-shrink:0; }
@@ -464,6 +466,14 @@
   var LIGHT = ['#FFFFFF','#ECE7DE','#F5F5F5'];
   var currentFilter = 'todos';
   var pendingPixOrder = null;
+  var SUPABASE_PUBLISHABLE = 'sb_publishable_cMJaMN1xjU4Oo75o6B1o0A_lC-CsrKY';
+  var SUPABASE_URL = 'https://maxkdaojxigeeqxjduoe.supabase.co';
+  // ID único do cliente salvo no navegador
+  var customerId = localStorage.getItem('cs_customer_id');
+  if (!customerId) {
+    customerId = 'cs_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+    localStorage.setItem('cs_customer_id', customerId);
+  }
 
   // ── Catálogo ───────────────────────────────────────────────
   function renderCatalog() {
@@ -804,6 +814,14 @@
 
   // ── Meus Pedidos ────────────────────────────────────────────
   function saveOrder(orderData) {
+    // Salva no Supabase via Netlify Function
+    orderData.customerId = customerId;
+    fetch('/.netlify/functions/payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'save_order', orderData: orderData })
+    }).catch(function(err) { console.log('Erro ao salvar pedido:', err); });
+    // Também salva localmente como backup
     var orders = JSON.parse(localStorage.getItem('cs_orders') || '[]');
     orders.unshift(orderData);
     localStorage.setItem('cs_orders', JSON.stringify(orders));
@@ -821,8 +839,28 @@
   }
 
   function renderOrders() {
-    var orders = JSON.parse(localStorage.getItem('cs_orders') || '[]');
     var body = document.getElementById('ordersBody');
+    body.innerHTML = '<div class="orders-empty">Carregando pedidos...</div>';
+    // Busca do Supabase
+    fetch('/.netlify/functions/payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_orders', customerId: customerId })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      var orders = (res.success && res.orders && res.orders.length > 0)
+        ? res.orders
+        : JSON.parse(localStorage.getItem('cs_orders') || '[]');
+      displayOrders(orders, body);
+    })
+    .catch(function() {
+      var orders = JSON.parse(localStorage.getItem('cs_orders') || '[]');
+      displayOrders(orders, body);
+    });
+  }
+
+  function displayOrders(orders, body) {
     if(orders.length === 0) {
       body.innerHTML = '<div class="orders-empty">Você ainda não tem pedidos.<br>Finalize uma compra para vê-la aqui!</div>';
       return;
@@ -839,8 +877,15 @@
         '</div>';
       }).join('');
 
-      var statusLabel = order.status === 'approved' ? 'Pago' : 'Pendente';
-      var statusClass = order.status === 'approved' ? 'approved' : 'pending';
+      var statusMap = {
+        'approved': { label: 'Pago', cls: 'approved' },
+        'pending':  { label: 'Pendente', cls: 'pending' },
+        'shipped':  { label: 'A caminho', cls: 'shipped' },
+        'delivered':{ label: 'Entregue', cls: 'delivered' }
+      };
+      var statusInfo = statusMap[order.status] || { label: order.status, cls: 'pending' };
+      var statusLabel = statusInfo.label;
+      var statusClass = statusInfo.cls;
 
       var div = document.createElement('div');
       div.className = 'order-card';
