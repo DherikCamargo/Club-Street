@@ -867,18 +867,12 @@
 
   // ── Notificação automática para o lojista ──────────────────
   function notifyOwner(order) {
-    var lines = order.items.map(function(i) {
-      return '- '+i.title+' | '+i.color+' | Tam. '+i.size+' | Qtd: '+i.quantity;
-    });
-    var nl = '%0A';
-    var msg = encodeURIComponent('NOVO PEDIDO RECEBIDO!') + nl +
-      encodeURIComponent('Pedido #'+order.id) + nl +
-      encodeURIComponent('Data: '+order.date) + nl +
-      encodeURIComponent('Total: '+order.total) + nl + nl +
-      encodeURIComponent('Itens:') + nl +
-      lines.map(function(l){ return encodeURIComponent(l); }).join(nl) + nl + nl +
-      encodeURIComponent('Pagamento confirmado via Mercado Pago.');
-    window.open('https://wa.me/'+WPP+'?text='+msg, '_blank');
+    // Envia notificação direto para o WhatsApp do lojista via CallMeBot (sem abrir WhatsApp do cliente)
+    fetch('/.netlify/functions/payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'notify_owner', orderData: order })
+    }).catch(function(err) { console.log('Notificação falhou:', err); });
   }
 
   renderCatalog();
