@@ -463,6 +463,7 @@
   var cart = [], mpBrickController = null;
   var LIGHT = ['#FFFFFF','#ECE7DE','#F5F5F5'];
   var currentFilter = 'todos';
+  var pendingPixOrder = null;
 
   // ── Catálogo ───────────────────────────────────────────────
   function renderCatalog() {
@@ -680,16 +681,45 @@
                   result.innerHTML='🎉 Pagamento aprovado!<br><small>Pedido #'+orderId+' salvo! Acesse <strong>Menu → Meus Pedidos</strong> para acompanhar.</small>';
                   cart=[];updateBadge();
                 } else if(res.success&&res.status==='pix'){
+                  // Guarda dados do pedido para salvar quando o código for copiado
+                  var orderId = Date.now().toString().slice(-6);
+                  var orderDate = new Date().toLocaleDateString('pt-BR');
+                  var orderTotal = 'R$ '+cart.reduce(function(s,i){return s+i.price*i.quantity;},0).toFixed(2).replace('.',',');
+                  pendingPixOrder = {
+                    id: orderId,
+                    date: orderDate,
+                    total: orderTotal,
+                    status: 'pending',
+                    items: cart.map(function(i){return{title:i.title,color:i.color,size:i.size,quantity:i.quantity,image:i.image};})
+                  };
                   result.className='pay-result pending';
-                  result.innerHTML='<strong>Pague via Pix</strong><br>'+(res.qrCodeBase64?'<img src="data:image/png;base64,'+res.qrCodeBase64+'" style="width:180px;height:180px;margin:12px auto;display:block;border-radius:8px;">':'')+
-                    '<p style="font-size:.78rem;color:#555;margin:8px 0 5px;">Ou copie o código:</p>'+
+                  result.innerHTML=
+                    '<strong style="font-size:1rem;color:#111;">Pague via Pix</strong><br>'+
+                    (res.qrCodeBase64?'<img src="data:image/png;base64,'+res.qrCodeBase64+'" style="width:180px;height:180px;margin:12px auto;display:block;border-radius:8px;">':'')+
+                    '<p style="font-size:.78rem;color:#555;margin:8px 0 5px;">Copie o código para confirmar seu pedido:</p>'+
                     '<div style="display:flex;gap:7px;align-items:center;background:#f5f5f5;border-radius:7px;padding:9px;word-break:break-all;font-size:.72rem;color:#333;">'+
                       '<span id="pixCode" style="flex:1;">'+(res.qrCode||'')+'</span>'+
                       '<button onclick="copyPix()" style="flex-shrink:0;padding:5px 9px;border:none;border-radius:5px;background:#009ee3;color:#fff;font-weight:700;cursor:pointer;font-size:.75rem;">Copiar</button>'+
-                    '</div><p style="font-size:.75rem;color:#888;margin-top:9px;">⏳ Confirmação automática após o Pix.</p>';
+                    '</div>'+
+                    '<p style="font-size:.75rem;color:#888;margin-top:9px;">⏳ Seu pedido será salvo em Meus Pedidos ao copiar o código.</p>';
                 } else if(res.success&&res.status==='boleto'){
+                  // Salva pedido para boleto também
+                  var orderId = Date.now().toString().slice(-6);
+                  var orderDate = new Date().toLocaleDateString('pt-BR');
+                  var orderTotal = 'R$ '+cart.reduce(function(s,i){return s+i.price*i.quantity;},0).toFixed(2).replace('.',',');
+                  var orderData = {
+                    id: orderId,
+                    date: orderDate,
+                    total: orderTotal,
+                    status: 'pending',
+                    items: cart.map(function(i){return{title:i.title,color:i.color,size:i.size,quantity:i.quantity,image:i.image};})
+                  };
+                  saveOrder(orderData);
+                  notifyOwner(orderData);
+                  cart=[];updateBadge();
                   result.className='pay-result pending';
-                  result.innerHTML='📄 '+res.message+(res.boletoUrl?'<br><a href="'+res.boletoUrl+'" target="_blank" style="display:inline-block;margin-top:10px;padding:9px 18px;background:#009ee3;color:#fff;border-radius:7px;text-decoration:none;font-weight:700;">Abrir boleto</a>':'');
+                  result.innerHTML='📄 Boleto gerado! Pedido #'+orderId+' salvo em <strong>Menu → Meus Pedidos</strong>.'+
+                    (res.boletoUrl?'<br><a href="'+res.boletoUrl+'" target="_blank" style="display:inline-block;margin-top:10px;padding:9px 18px;background:#009ee3;color:#fff;border-radius:7px;text-decoration:none;font-weight:700;">Abrir boleto</a>':'');
                 } else {
                   result.className='pay-result error';
                   result.innerHTML='❌ '+(res.message||'Erro no pagamento. Tente novamente.');
@@ -714,7 +744,24 @@
     window.open('https://wa.me/'+WPP+'?text='+encodeURIComponent(msg),'_blank');
   }
 
-  function copyPix(){var c=document.getElementById('pixCode');if(!c)return;navigator.clipboard.writeText(c.textContent).then(function(){showToast('Código Pix copiado!');});}
+  function copyPix(){
+    var c=document.getElementById('pixCode');
+    if(!c) return;
+    navigator.clipboard.writeText(c.textContent).then(function(){
+      showToast('Código Pix copiado! Pedido salvo em Meus Pedidos.');
+      // Salva pedido e notifica lojista ao copiar o código
+      if(pendingPixOrder) {
+        saveOrder(pendingPixOrder);
+        notifyOwner(pendingPixOrder);
+        cart=[];
+        updateBadge();
+        // Atualiza mensagem na tela
+        var msg = document.querySelector('.pay-result p:last-child');
+        if(msg) msg.innerHTML = '✅ Pedido #'+pendingPixOrder.id+' salvo! Acesse <strong>Menu → Meus Pedidos</strong>.';
+        pendingPixOrder = null;
+      }
+    });
+  }
 
   function openGuide() {
     document.getElementById('guideOverlay').classList.add('active');
