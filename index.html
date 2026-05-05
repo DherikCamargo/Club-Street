@@ -64,6 +64,27 @@
     .card-sw.light { border-color:#888; }
     .card-sw.active { border:2px solid #fff; }
 
+    /* GUIA DE MEDIDAS MODAL */
+    .guide-btn {
+      display:flex; align-items:center; gap:10px;
+      width:100%; padding:12px 16px; margin-top:14px;
+      border:1.5px solid #333; border-radius:12px;
+      background:transparent; color:#ccc; cursor:pointer;
+      font-size:.9rem; font-weight:600; text-align:left;
+      transition:border-color .2s, color .2s;
+    }
+    .guide-btn:hover { border-color:#fff; color:#fff; }
+    .guide-btn svg { flex-shrink:0; }
+    .guide-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:600; align-items:center; justify-content:center; padding:16px; }
+    .guide-overlay.active { display:flex; }
+    .guide-shell { width:min(500px,96vw); max-height:90vh; overflow-y:auto; background:#151515; border-radius:18px; position:relative; }
+    .guide-hdr { display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid #2b2b2b; }
+    .guide-hdr h3 { margin:0; font-size:1rem; }
+    .guide-x { background:none; border:none; color:#fff; font-size:1.4rem; cursor:pointer; }
+    .guide-body { padding:16px; text-align:center; }
+    .guide-body p { color:var(--muted); font-size:.88rem; margin-bottom:12px; }
+    .guide-body img { width:100%; border-radius:10px; border:1px solid #2b2b2b; }
+
     /* MODAL */
     .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.9); align-items:center; justify-content:center; padding:16px; z-index:200; }
     .modal.active { display:flex; }
@@ -201,6 +222,16 @@
         <div id="modalSwatches" class="swatches"></div>
         <div class="det-label">Tamanho: <span id="modalSizeName">P</span></div>
         <div id="modalSizes" class="sizes"></div>
+        <button class="guide-btn" onclick="openGuide()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="6" width="20" height="12" rx="2"/>
+              <line x1="6" y1="10" x2="6" y2="14"/>
+              <line x1="10" y1="10" x2="10" y2="12"/>
+              <line x1="14" y1="10" x2="14" y2="12"/>
+              <line x1="18" y1="10" x2="18" y2="14"/>
+            </svg>
+            Veja o seu tamanho
+          </button>
         <div class="modal-actions">
           <button class="add-cart-btn" onclick="addToCart()">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
@@ -249,6 +280,20 @@
     </div>
     <div id="paymentBrick_container"></div>
     <div id="payResult" class="pay-result" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- GUIA DE MEDIDAS -->
+<div class="guide-overlay" id="guideOverlay" onclick="outsideGuide(event)">
+  <div class="guide-shell">
+    <div class="guide-hdr">
+      <h3>📏 Guia de medidas</h3>
+      <button class="guide-x" onclick="closeGuide()">×</button>
+    </div>
+    <div class="guide-body">
+      <p>Compare as medidas com uma peça sua para escolher o tamanho ideal.</p>
+      <img src="https://raw.githubusercontent.com/DherikCamargo/Club-Street/main/img_007.png" alt="Guia de medidas" loading="lazy" />
+    </div>
   </div>
 </div>
 
@@ -555,6 +600,18 @@
   }
 
   function copyPix(){var c=document.getElementById('pixCode');if(!c)return;navigator.clipboard.writeText(c.textContent).then(function(){showToast('Código Pix copiado!');});}
+
+  function openGuide() {
+    document.getElementById('guideOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeGuide() {
+    document.getElementById('guideOverlay').classList.remove('active');
+    document.body.style.overflow = 'hidden'; // keep modal scroll locked
+  }
+  function outsideGuide(e) {
+    if(e.target === document.getElementById('guideOverlay')) closeGuide();
+  }
 
   function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
 
