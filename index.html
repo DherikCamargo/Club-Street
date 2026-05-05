@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Club Street</title>
+  <meta name="description" content="Club Street – Camisetas premium 100% Algodão com designs exclusivos." />
+  <meta property="og:title" content="Club Street" />
+  <meta property="og:description" content="Camisetas premium 100% Algodão com designs exclusivos." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/DherikCamargo/Club-Street/main/img_001.png" />
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    :root { --green:#25D366; --green-dark:#1da851; --mp:#009ee3; --mp-dark:#007cc1; --muted:#b8b8b8; }
+    body { font-family:Arial,Helvetica,sans-serif; background:#111; color:#fff; line-height:1.4; }
+
+    /* TOPBAR */
+    .topbar { position:sticky; top:0; z-index:100; background:rgba(17,17,17,.96); border-bottom:1px solid #232323; backdrop-filter:blur(10px); }
+    .topbar-inner { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; }
+    .brand { font-size:1rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+    .topbar-actions { display:flex; gap:8px; align-items:center; }
+    .mini-btn { padding:11px 18px; border:1.5px solid var(--green); border-radius:999px; color:#fff; font-size:.95rem; font-weight:700; text-decoration:none; transition:background .2s; }
+    .mini-btn:hover { background:var(--green); }
+    .cart-btn { position:relative; background:none; border:1.5px solid #444; border-radius:999px; color:#fff; padding:11px 14px; cursor:pointer; font-size:.95rem; display:flex; align-items:center; gap:5px; }
+    .cart-badge { position:absolute; top:-6px; right:-6px; background:var(--green); color:#fff; font-size:.6rem; font-weight:800; width:18px; height:18px; border-radius:50%; display:none; align-items:center; justify-content:center; }
+    .cart-badge.visible { display:flex; }
+
+    /* HERO */
+    .hero { display:flex; flex-direction:column; align-items:center; text-align:center; padding:20px 14px 14px; gap:10px; }
+    .hero-tag { padding:5px 16px; border:1.5px solid var(--green); border-radius:999px; color:var(--green); font-size:.82rem; letter-spacing:.1em; text-transform:uppercase; }
+    .hero p { color:var(--muted); font-size:.92rem; }
+
+    /* CATALOG */
+    .catalog-label { padding:0 14px 8px; font-size:.85rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+
+    /* GRID */
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+
+    /* CARD */
+    .card { display:flex; flex-direction:column; background:transparent; cursor:pointer; }
+    .image-wrap { position:relative; overflow:hidden; background:#1a1a1a; }
+    .card-img { width:100%; object-fit:cover; display:block; }
+    .bag-btn { position:absolute; bottom:10px; right:10px; width:38px; height:38px; background:#fff; border:none; border-radius:6px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; box-shadow:0 2px 8px rgba(0,0,0,.4); }
+    .bag-btn svg { width:19px; height:19px; }
+    .size-picker { display:none; position:absolute; bottom:0; left:0; right:0; background:#fff; padding:8px 6px; gap:4px; z-index:3; }
+    .size-picker.open { display:flex; }
+    .sp-btn { flex:1; padding:11px 4px; border:1px solid #ddd; background:#fff; color:#111; font-weight:700; font-size:.88rem; cursor:pointer; text-align:center; }
+    .sp-btn:hover { background:#111; color:#fff; border-color:#111; }
+    .card-info { padding:12px 10px 20px; display:flex; flex-direction:column; gap:9px; }
+    .card-name { font-size:1.05rem; font-weight:700; color:#fff; line-height:1.35; }
+    .card-price { font-size:1.2rem; font-weight:900; color:#fff; }
+    .card-swatches { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .card-sw { width:34px; height:34px; border-radius:4px; border:2px solid #555; cursor:pointer; flex-shrink:0; }
+    .card-sw.light { border-color:#888; }
+    .card-sw.active { border:2px solid #fff; }
+
+    /* MODAL */
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.9); align-items:center; justify-content:center; padding:16px; z-index:200; }
+    .modal.active { display:flex; }
+    .modal-shell { width:min(700px,96vw); max-height:92vh; overflow:auto; background:#151515; border:1px solid #2b2b2b; border-radius:18px; position:relative; }
+    .modal-inner { display:flex; flex-direction:column; }
+    .preview-area { padding:16px; background:#0e0e0e; }
+    .preview-area img { width:100%; border-radius:12px; }
+    .details-area { padding:20px 18px 18px; }
+    .det-label { font-size:.8rem; color:var(--muted); margin-bottom:6px; }
+    .swatches { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .swatch { width:32px; height:32px; border-radius:8px; border:2px solid #444; cursor:pointer; }
+    .swatch.active { border-color:#fff; }
+    .swatch.light { border-color:#999; }
+    .sizes { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:4px; }
+    .size-btn { min-width:50px; padding:9px 12px; border-radius:8px; background:#202020; border:1px solid #3a3a3a; color:#fff; cursor:pointer; font-weight:700; font-size:.9rem; }
+    .size-btn.active { background:#fff; color:#000; }
+    .modal-actions { display:flex; flex-direction:column; gap:9px; margin-top:16px; }
+    .add-cart-btn { width:100%; padding:14px; border:0; border-radius:11px; background:#fff; color:#111; font-weight:700; cursor:pointer; font-size:.98rem; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .send-btn { width:100%; padding:12px; border:1.5px solid var(--green); border-radius:11px; background:transparent; color:var(--green); font-weight:700; cursor:pointer; font-size:.9rem; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .modal-close { position:absolute; top:10px; right:10px; width:34px; height:34px; border:0; border-radius:50%; background:#fff; color:#000; font-size:22px; cursor:pointer; z-index:10; display:flex; align-items:center; justify-content:center; }
+
+    /* CARRINHO DRAWER */
+    .cart-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:300; display:none; }
+    .cart-overlay.active { display:block; }
+    .cart-drawer { position:fixed; top:0; right:0; bottom:0; width:min(400px,100vw); background:#161616; border-left:1px solid #2b2b2b; z-index:301; transform:translateX(100%); transition:transform .3s; display:flex; flex-direction:column; }
+    .cart-drawer.open { transform:translateX(0); }
+    .cart-hdr { padding:16px; border-bottom:1px solid #222; display:flex; align-items:center; justify-content:space-between; }
+    .cart-hdr h3 { font-size:1rem; }
+    .cart-x { background:none; border:none; color:#fff; font-size:1.4rem; cursor:pointer; }
+    .cart-body { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px; }
+    .cart-empty { text-align:center; color:var(--muted); padding:40px 20px; font-size:.9rem; }
+    .cart-item { background:#1e1e1e; border:1px solid #2a2a2a; border-radius:12px; padding:12px; display:flex; gap:10px; }
+    .ci-img { width:60px; height:60px; border-radius:8px; object-fit:cover; flex-shrink:0; }
+    .ci-info { flex:1; }
+    .ci-info strong { display:block; font-size:.88rem; margin-bottom:3px; }
+    .ci-info span { color:var(--muted); font-size:.78rem; }
+    .ci-price { font-weight:700; font-size:.9rem; margin-top:5px; }
+    .qty-ctrl { display:flex; align-items:center; gap:7px; margin-top:7px; }
+    .qty-btn { width:26px; height:26px; border-radius:6px; border:1px solid #333; background:#252525; color:#fff; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; }
+    .qty-num { font-size:.88rem; font-weight:700; min-width:18px; text-align:center; }
+    .ci-rm { background:none; border:none; color:#555; cursor:pointer; font-size:1rem; padding:2px 4px; flex-shrink:0; }
+    .ci-rm:hover { color:#ff4d4d; }
+    .cart-foot { padding:14px 16px; border-top:1px solid #222; display:flex; flex-direction:column; gap:9px; }
+    .cart-total { display:flex; justify-content:space-between; font-size:1rem; }
+    .cart-total strong { font-size:1.15rem; }
+    .mp-btn { width:100%; padding:14px; border:0; border-radius:11px; background:var(--mp); color:#fff; font-weight:700; cursor:pointer; font-size:.96rem; display:flex; align-items:center; justify-content:center; gap:7px; }
+    .mp-btn:disabled { opacity:.6; cursor:not-allowed; }
+    .wpp-btn { width:100%; padding:12px; border:1.5px solid var(--green); border-radius:11px; background:transparent; color:var(--green); font-weight:700; cursor:pointer; font-size:.9rem; display:flex; align-items:center; justify-content:center; gap:7px; }
+    .cart-note { font-size:.72rem; color:var(--muted); text-align:center; }
+
+    /* PAGAMENTO */
+    .pay-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:500; align-items:center; justify-content:center; padding:14px; }
+    .pay-overlay.active { display:flex; }
+    .pay-shell { width:min(500px,96vw); max-height:90vh; overflow-y:auto; background:#fff; border-radius:18px; }
+    .pay-hdr { display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid #eee; color:#111; font-weight:700; }
+    .pay-x { background:none; border:none; font-size:1.5rem; cursor:pointer; color:#555; }
+    .pay-result { padding:22px; text-align:center; font-size:.96rem; font-weight:600; border-radius:0 0 18px 18px; }
+    .pay-result.approved { background:#f0fff4; color:#1a7a3c; }
+    .pay-result.pending  { background:#fffbea; color:#7a5c00; }
+    .pay-result.error    { background:#fff0f0; color:#aa0000; }
+
+    /* SHIPPING */
+    .shipping-box { padding:14px; display:flex; flex-direction:column; gap:12px; }
+    .shipping-card { background:#181818; border:1px solid #2c2c2c; border-radius:14px; padding:16px; text-align:center; }
+    .shipping-card strong { display:block; font-size:.95rem; margin-bottom:5px; }
+    .shipping-card span { color:var(--muted); font-size:.85rem; }
+
+    /* MEDIDAS */
+    .measure-box { padding:14px; text-align:center; }
+    .measure-box h3 { margin-bottom:8px; font-size:1rem; }
+    .measure-box p { color:var(--muted); font-size:.88rem; margin-bottom:12px; }
+    .measure-box img { max-width:100%; border-radius:10px; border:1px solid #2b2b2b; }
+
+    /* FOOTER */
+    .footer { padding:16px; color:var(--muted); font-size:.8rem; text-align:center; }
+
+    /* TOAST */
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--green); color:#fff; padding:12px 22px; border-radius:12px; font-weight:600; font-size:.88rem; z-index:9999; transition:transform .3s; pointer-events:none; white-space:nowrap; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+  </style>
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Club Street</div>
+    <div class="topbar-actions">
+      <a class="mini-btn" href="https://wa.me/5516994451494" target="_blank" rel="noopener">WhatsApp</a>
+      <button class="cart-btn" onclick="openCart()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span id="cartBadge" class="cart-badge">0</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="hero">
+  <span class="hero-tag">Frete grátis • Todo o Brasil</span>
+  <p>Camisetas premium 100% Algodão com designs exclusivos.</p>
+</div>
+
+<div class="catalog-label">Coleção</div>
+<div class="grid" id="catalogGrid"></div>
+
+<div class="shipping-box">
+  <div class="shipping-card">
+    <strong>Entrega grátis • Envio em até 1 dia útil</strong>
+    <span>Frete grátis e separação rápida após aprovação do pedido.</span>
+  </div>
+  <div class="shipping-card">
+    <strong>Pagamento seguro via Mercado Pago ou WhatsApp</strong>
+    <span>Cartão, Pix, boleto ou finalize pelo WhatsApp.</span>
+  </div>
+</div>
+
+<section id="medidas" class="measure-box">
+  <h3>Guia de medidas</h3>
+  <p>Compare com uma peça sua para escolher o tamanho ideal.</p>
+  <img src="https://raw.githubusercontent.com/DherikCamargo/Club-Street/main/img_007.png" alt="Guia de medidas" loading="lazy" />
+</section>
+
+<div class="footer">Club Street • Envio em 1 dia útil • Entrega grátis para todo o Brasil</div>
+
+<!-- MODAL PRODUTO -->
+<div id="modal" class="modal" onclick="outsideClose(event)">
+  <div class="modal-shell">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-inner">
+      <div class="preview-area"><img id="modalImg" src="" alt="" loading="lazy"></div>
+      <div class="details-area">
+        <h2 id="modalTitle" style="margin-bottom:6px;font-size:1.1rem;"></h2>
+        <p id="modalPrice" style="font-size:1rem;font-weight:800;margin-bottom:14px;"></p>
+        <div class="det-label">Cor: <span id="modalColorName"></span></div>
+        <div id="modalSwatches" class="swatches"></div>
+        <div class="det-label">Tamanho: <span id="modalSizeName">P</span></div>
+        <div id="modalSizes" class="sizes"></div>
+        <div class="modal-actions">
+          <button class="add-cart-btn" onclick="addToCart()">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Adicionar ao carrinho
+          </button>
+          <button class="send-btn" onclick="sendWhatsApp()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.528 5.847L0 24l6.335-1.652A11.954 11.954 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.006-1.373l-.36-.213-3.727.977.994-3.634-.234-.373A9.818 9.818 0 0 1 2.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg>
+            Pedir pelo WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CARRINHO -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-hdr">
+    <h3>🛒 Meu carrinho</h3>
+    <button class="cart-x" onclick="closeCart()">×</button>
+  </div>
+  <div class="cart-body" id="cartBody">
+    <div class="cart-empty">Seu carrinho está vazio.<br>Escolha uma camiseta!</div>
+  </div>
+  <div class="cart-foot" id="cartFoot" style="display:none;">
+    <div class="cart-total"><span>Total</span><strong id="cartTotal">R$ 0,00</strong></div>
+    <button class="mp-btn" id="mpBtn" onclick="checkoutMP()">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+      Pagar com Mercado Pago
+    </button>
+    <button class="wpp-btn" onclick="checkoutWPP()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.528 5.847L0 24l6.335-1.652A11.954 11.954 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.006-1.373l-.36-.213-3.727.977.994-3.634-.234-.373A9.818 9.818 0 0 1 2.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg>
+      Finalizar pelo WhatsApp
+    </button>
+    <p class="cart-note">🔒 Pagamento seguro • Frete grátis incluído</p>
+  </div>
+</div>
+
+<!-- PAGAMENTO -->
+<div class="pay-overlay" id="payOverlay">
+  <div class="pay-shell">
+    <div class="pay-hdr">
+      <span>💳 Pagamento seguro</span>
+      <button class="pay-x" onclick="closePayModal()">×</button>
+    </div>
+    <div id="paymentBrick_container"></div>
+    <div id="payResult" class="pay-result" style="display:none;"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  var BASE = 'https://raw.githubusercontent.com/DherikCamargo/Club-Street/main/';
+  var WPP  = '5516994451494';
+  var PRICES = { teste: 1.00 };
+  var MP_PUBLIC_KEY = 'APP_USR-a9583197-4c3a-4235-ba44-a043bdef284b';
+
+  var PRODUCTS = [
+    { id:'snipe', title:'Camiseta Snipe', price:'R$ 69,90', sizes:['P','M','G','GG'], colors:[
+      {name:'Preta',hex:'#111111',image:BASE+'img_001.png'},
+      {name:'Bordô',hex:'#6A1832',image:BASE+'img_008.png'},
+      {name:'Off White',hex:'#ECE7DE',image:BASE+'img_009.png'},
+      {name:'Branca',hex:'#FFFFFF',image:BASE+'img_010.png'}
+    ]},
+    { id:'anjo', title:'Camiseta Anjo', price:'R$ 69,90', sizes:['P','M','G','GG'], colors:[
+      {name:'Azul Marinho',hex:'#162544',image:BASE+'img_002.png'},
+      {name:'Bordô',hex:'#6A1832',image:BASE+'img_011.png'},
+      {name:'Preta',hex:'#111111',image:BASE+'img_012.png'}
+    ]},
+    { id:'peace', title:'Camiseta Peace', price:'R$ 69,90', sizes:['P','M','G','GG'], colors:[
+      {name:'Bordô',hex:'#6A1832',image:BASE+'img_003.png'},
+      {name:'Preta',hex:'#111111',image:BASE+'img_013.png'},
+      {name:'Azul Marinho',hex:'#162544',image:BASE+'img_014.png'}
+    ]},
+    { id:'rosa', title:'Camiseta Rosa', price:'R$ 69,90', sizes:['P','M','G','GG'], colors:[
+      {name:'Off White',hex:'#ECE7DE',image:BASE+'img_004.png'},
+      {name:'Preta',hex:'#111111',image:BASE+'img_015.png'},
+      {name:'Branca',hex:'#FFFFFF',image:BASE+'img_016.png'},
+      {name:'Azul Marinho',hex:'#1F2E46',image:BASE+'img_017.png'}
+    ]},
+    { id:'never', title:'Camiseta Never', price:'R$ 69,90', sizes:['P','M','G','GG'], colors:[
+      {name:'Verde Escuro',hex:'#1E382A',image:BASE+'img_005.png'},
+      {name:'Off White',hex:'#ECE7DE',image:BASE+'img_018.png'},
+      {name:'Bordô',hex:'#6A1832',image:BASE+'img_019.png'},
+      {name:'Preta',hex:'#111111',image:BASE+'img_020.png'},
+      {name:'Branca',hex:'#FFFFFF',image:BASE+'img_021.png'},
+      {name:'Azul Marinho',hex:'#1F2E46',image:BASE+'img_022.png'}
+    ]},
+    { id:'creeping', title:'Camiseta Creeping', price:'R$ 69,90', sizes:['P','M','G','GG'], colors:[
+      {name:'Off White',hex:'#ECE7DE',image:BASE+'img_006.png'},
+      {name:'Bordô',hex:'#6B1F2B',image:BASE+'img_023.png'},
+      {name:'Preta',hex:'#111111',image:BASE+'img_024.png'},
+      {name:'Azul Marinho',hex:'#1E2F4F',image:BASE+'img_025.png'}
+    ]},
+    { id:'teste', title:'Produto Teste', price:'R$ 1,00', sizes:['P','M','G','GG'], colors:[
+      {name:'Preta',hex:'#111111',image:BASE+'img_001.png'}
+    ]},
+    { id:'staypositive', title:'Camiseta Stay Positive', price:'R$ 69,90', sizes:['P','M','G','GG'], colors:[
+      {name:'Preta',hex:'#111111',image:BASE+'img_026.png'},
+      {name:'Off White',hex:'#ECE7DE',image:BASE+'img_027.png'},
+      {name:'Bordô',hex:'#6A1832',image:BASE+'img_028.png'},
+      {name:'Azul Marinho',hex:'#162544',image:BASE+'img_029.png'}
+    ]}
+  ];
+
+  // ── Ajuste dinâmico de tamanho via JS ──────────────────────
+  function applyLayout() {
+    var W = window.innerWidth;
+    var imgH = Math.round(W * 0.72); // 72% da largura real da tela
+    document.querySelectorAll('.card-img').forEach(function(img) {
+      img.style.height = imgH + 'px';
+    });
+  }
+  window.addEventListener('resize', applyLayout);
+
+  // ── Estado ─────────────────────────────────────────────────
+  var currentProduct = null, selectedColor = null, selectedSize = 'P';
+  var cart = [], mpBrickController = null;
+  var LIGHT = ['#FFFFFF','#ECE7DE','#F5F5F5'];
+
+  // ── Catálogo ───────────────────────────────────────────────
+  function renderCatalog() {
+    var grid = document.getElementById('catalogGrid');
+    grid.innerHTML = '';
+    PRODUCTS.forEach(function(p) {
+      var fc = p.colors[0];
+      var article = document.createElement('article');
+      article.className = 'card';
+      article.dataset.pid = p.id;
+      article.dataset.activeColor = fc.name;
+
+      var swHtml = p.colors.map(function(c) {
+        var cls = 'card-sw' + (c.name===fc.name?' active':'') + (LIGHT.indexOf(c.hex.toUpperCase())!==-1?' light':'');
+        return '<button class="'+cls+'" style="background:'+c.hex+'" data-color="'+c.name+'" data-img="'+c.image+'" title="'+c.name+'"></button>';
+      }).join('');
+
+      var spHtml = p.sizes.map(function(s) {
+        return '<button class="sp-btn" data-size="'+s+'">'+s+'</button>';
+      }).join('');
+
+      article.innerHTML =
+        '<div class="image-wrap">'+
+          '<img class="card-img" src="'+fc.image+'" alt="'+p.title+'" loading="lazy">'+
+          '<button class="bag-btn" type="button">'+
+            '<svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" width="19" height="19"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>'+
+          '</button>'+
+          '<div class="size-picker" id="sp-'+p.id+'">'+spHtml+'</div>'+
+        '</div>'+
+        '<div class="card-info">'+
+          '<div class="card-name">'+p.title+'</div>'+
+          '<div class="card-price">'+p.price+'</div>'+
+          '<div class="card-swatches">'+swHtml+'</div>'+
+        '</div>';
+
+      // Clique na imagem → modal
+      article.querySelector('.card-img').addEventListener('click', function() { openProduct(p.id); });
+      article.querySelector('.card-info').addEventListener('click', function() { openProduct(p.id); });
+
+      // Clique sacola → tamanhos
+      article.querySelector('.bag-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        document.querySelectorAll('.size-picker.open').forEach(function(el) { el.classList.remove('open'); });
+        document.getElementById('sp-'+p.id).classList.toggle('open');
+      });
+
+      // Clique tamanho → adiciona ao carrinho direto
+      article.querySelectorAll('.sp-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var size = btn.dataset.size;
+          var activeColor = article.dataset.activeColor;
+          var colorData = p.colors.find(function(c){return c.name===activeColor;}) || p.colors[0];
+          var price = PRICES[p.id]!==undefined ? PRICES[p.id] : 69.90;
+          var existing = cart.find(function(i){return i.id===p.id&&i.color===activeColor&&i.size===size;});
+          if (existing) { existing.quantity++; } else {
+            cart.push({id:p.id,title:p.title,color:activeColor,size:size,image:colorData.image,price:price,quantity:1});
+          }
+          updateBadge();
+          document.getElementById('sp-'+p.id).classList.remove('open');
+          showToast('✓ '+p.title+' ('+size+') adicionado!');
+        });
+      });
+
+      // Clique swatch → muda foto
+      article.querySelectorAll('.card-sw').forEach(function(sw) {
+        sw.addEventListener('click', function(e) {
+          e.stopPropagation();
+          article.querySelectorAll('.card-sw').forEach(function(s){s.classList.remove('active');});
+          sw.classList.add('active');
+          article.dataset.activeColor = sw.dataset.color;
+          article.querySelector('.card-img').src = sw.dataset.img;
+        });
+      });
+
+      grid.appendChild(article);
+    });
+
+    applyLayout();
+
+    // Fecha picker ao clicar fora
+    document.addEventListener('click', function() {
+      document.querySelectorAll('.size-picker.open').forEach(function(el){el.classList.remove('open');});
+    });
+  }
+
+  // ── Modal produto ──────────────────────────────────────────
+  function openProduct(id) {
+    currentProduct = PRODUCTS.find(function(p){return p.id===id;});
+    if (!currentProduct) return;
+    selectedColor = currentProduct.colors[0].name;
+    selectedSize  = 'P';
+    renderModal();
+    document.getElementById('modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function renderModal() {
+    var cd = currentProduct.colors.find(function(c){return c.name===selectedColor;})||currentProduct.colors[0];
+    document.getElementById('modalImg').src      = cd.image;
+    document.getElementById('modalTitle').textContent = currentProduct.title;
+    document.getElementById('modalPrice').textContent = currentProduct.price;
+    document.getElementById('modalColorName').textContent = cd.name;
+    document.getElementById('modalSizeName').textContent  = selectedSize;
+
+    var sw = document.getElementById('modalSwatches'); sw.innerHTML='';
+    currentProduct.colors.forEach(function(c) {
+      var b=document.createElement('button'); b.className='swatch'+(c.name===selectedColor?' active':'');
+      if(LIGHT.indexOf(c.hex.toUpperCase())!==-1) b.classList.add('light');
+      b.style.background=c.hex; b.title=c.name;
+      b.addEventListener('click',function(){selectedColor=c.name;renderModal();});
+      sw.appendChild(b);
+    });
+
+    var sz = document.getElementById('modalSizes'); sz.innerHTML='';
+    currentProduct.sizes.forEach(function(s) {
+      var b=document.createElement('button'); b.className='size-btn'+(s===selectedSize?' active':'');
+      b.textContent=s;
+      b.addEventListener('click',function(){selectedSize=s;renderModal();});
+      sz.appendChild(b);
+    });
+  }
+
+  function closeModal() { document.getElementById('modal').classList.remove('active'); document.body.style.overflow=''; }
+  function outsideClose(e) { if(e.target===document.getElementById('modal')) closeModal(); }
+  document.addEventListener('keydown',function(e){if(e.key==='Escape') closeModal();});
+
+  function addToCart() {
+    if(!currentProduct) return;
+    var cd = currentProduct.colors.find(function(c){return c.name===selectedColor;})||currentProduct.colors[0];
+    var price = PRICES[currentProduct.id]!==undefined ? PRICES[currentProduct.id] : 69.90;
+    var existing = cart.find(function(i){return i.id===currentProduct.id&&i.color===selectedColor&&i.size===selectedSize;});
+    if(existing){existing.quantity++;}else{cart.push({id:currentProduct.id,title:currentProduct.title,color:selectedColor,size:selectedSize,image:cd.image,price:price,quantity:1});}
+    updateBadge();
+    showToast('✓ Adicionado ao carrinho!');
+    closeModal(); openCart();
+  }
+
+  function sendWhatsApp() {
+    if(!currentProduct) return;
+    var msg='Olá, quero a '+currentProduct.title+', cor '+selectedColor+', tamanho '+selectedSize+'.';
+    window.open('https://wa.me/'+WPP+'?text='+encodeURIComponent(msg),'_blank');
+  }
+
+  // ── Carrinho ───────────────────────────────────────────────
+  function updateBadge() {
+    var total = cart.reduce(function(s,i){return s+i.quantity;},0);
+    var b = document.getElementById('cartBadge');
+    b.textContent=total; total>0?b.classList.add('visible'):b.classList.remove('visible');
+  }
+
+  function renderCart() {
+    var body=document.getElementById('cartBody'), foot=document.getElementById('cartFoot');
+    if(cart.length===0){body.innerHTML='<div class="cart-empty">Seu carrinho está vazio.<br>Escolha uma camiseta!</div>';foot.style.display='none';return;}
+    foot.style.display='flex'; body.innerHTML=''; var total=0;
+    cart.forEach(function(item,i){
+      total+=item.price*item.quantity;
+      var d=document.createElement('div'); d.className='cart-item';
+      d.innerHTML='<img class="ci-img" src="'+item.image+'" alt="'+item.title+'" loading="lazy">'+
+        '<div class="ci-info"><strong>'+item.title+'</strong><span>'+item.color+' • Tam. '+item.size+'</span>'+
+        '<div class="qty-ctrl">'+
+          '<button class="qty-btn" data-i="'+i+'" data-d="-1">−</button>'+
+          '<span class="qty-num">'+item.quantity+'</span>'+
+          '<button class="qty-btn" data-i="'+i+'" data-d="1">+</button>'+
+        '</div>'+
+        '<div class="ci-price">R$ '+(item.price*item.quantity).toFixed(2).replace('.',',')+'</div></div>'+
+        '<button class="ci-rm" data-i="'+i+'">✕</button>';
+      body.appendChild(d);
+    });
+    body.querySelectorAll('.qty-btn').forEach(function(b){b.addEventListener('click',function(){changeQty(+b.dataset.i,+b.dataset.d);});});
+    body.querySelectorAll('.ci-rm').forEach(function(b){b.addEventListener('click',function(){cart.splice(+b.dataset.i,1);updateBadge();renderCart();});});
+    document.getElementById('cartTotal').textContent='R$ '+total.toFixed(2).replace('.',',');
+  }
+
+  function changeQty(i,d){cart[i].quantity+=d;if(cart[i].quantity<=0)cart.splice(i,1);updateBadge();renderCart();}
+  function openCart(){renderCart();document.getElementById('cartOverlay').classList.add('active');document.getElementById('cartDrawer').classList.add('open');document.body.style.overflow='hidden';}
+  function closeCart(){document.getElementById('cartOverlay').classList.remove('active');document.getElementById('cartDrawer').classList.remove('open');document.body.style.overflow='';}
+
+  // ── Checkout Mercado Pago ──────────────────────────────────
+  function checkoutMP() {
+    if(!cart.length) return;
+    var btn=document.getElementById('mpBtn'); btn.disabled=true; btn.textContent='Aguarde...';
+    var payload=cart.map(function(i){return{id:i.id,title:i.title,color:i.color,size:i.size,price:i.price,quantity:i.quantity};});
+    var total=cart.reduce(function(s,i){return s+i.price*i.quantity;},0);
+    fetch('/.netlify/functions/payment', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'create_preference',cartItems:payload})
+    })
+    .then(function(r){return r.json();})
+    .then(function(r){
+      btn.disabled=false; btn.textContent='Pagar com Mercado Pago';
+      if(r.success){openPayModal(r.preferenceId,total);}else{alert('Erro: '+(r.error||'tente novamente.'));}
+    })
+    .catch(function(){btn.disabled=false;btn.textContent='Pagar com Mercado Pago';alert('Erro de conexão.');});
+  }
+
+  function openPayModal(prefId, total) {
+    var overlay=document.getElementById('payOverlay'), container=document.getElementById('paymentBrick_container'), result=document.getElementById('payResult');
+    container.innerHTML=''; result.style.display='none'; result.className='pay-result';
+    overlay.classList.add('active'); document.body.style.overflow='hidden';
+    var mp=new MercadoPago(MP_PUBLIC_KEY,{locale:'pt-BR'});
+    mp.bricks().create('payment','paymentBrick_container',{
+      initialization:{amount:total,preferenceId:prefId},
+      customization:{paymentMethods:{creditCard:'all',debitCard:'all',ticket:'all',bankTransfer:'all'},visual:{style:{theme:'default'}}},
+      callbacks:{
+        onReady:function(){},
+        onSubmit:function(data){
+          return new Promise(function(resolve,reject){
+            fetch('/.netlify/functions/payment',{
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({action:'process_payment',paymentData:data.formData})
+            })
+            .then(function(r){return r.json();})
+            .then(function(res){
+                container.innerHTML=''; result.style.display='block';
+                if(res.success&&res.status==='approved'){
+                  result.className='pay-result approved';
+                  result.innerHTML='🎉 '+res.message+'<br><small>Entraremos em contato em breve!</small>';
+                  cart=[];updateBadge();
+                } else if(res.success&&res.status==='pix'){
+                  result.className='pay-result pending';
+                  result.innerHTML='<strong>Pague via Pix</strong><br>'+(res.qrCodeBase64?'<img src="data:image/png;base64,'+res.qrCodeBase64+'" style="width:180px;height:180px;margin:12px auto;display:block;border-radius:8px;">':'')+
+                    '<p style="font-size:.78rem;color:#555;margin:8px 0 5px;">Ou copie o código:</p>'+
+                    '<div style="display:flex;gap:7px;align-items:center;background:#f5f5f5;border-radius:7px;padding:9px;word-break:break-all;font-size:.72rem;color:#333;">'+
+                      '<span id="pixCode" style="flex:1;">'+(res.qrCode||'')+'</span>'+
+                      '<button onclick="copyPix()" style="flex-shrink:0;padding:5px 9px;border:none;border-radius:5px;background:#009ee3;color:#fff;font-weight:700;cursor:pointer;font-size:.75rem;">Copiar</button>'+
+                    '</div><p style="font-size:.75rem;color:#888;margin-top:9px;">⏳ Confirmação automática após o Pix.</p>';
+                } else if(res.success&&res.status==='boleto'){
+                  result.className='pay-result pending';
+                  result.innerHTML='📄 '+res.message+(res.boletoUrl?'<br><a href="'+res.boletoUrl+'" target="_blank" style="display:inline-block;margin-top:10px;padding:9px 18px;background:#009ee3;color:#fff;border-radius:7px;text-decoration:none;font-weight:700;">Abrir boleto</a>':'');
+                } else {
+                  result.className='pay-result error';
+                  result.innerHTML='❌ '+(res.message||'Erro no pagamento. Tente novamente.');
+                }
+                resolve();
+            })
+            .catch(function(err){result.style.display='block';result.className='pay-result error';result.innerHTML='❌ Erro de conexão.';reject(err);});
+          });
+        },
+        onError:function(err){console.error(err);}
+      }
+    }).then(function(ctrl){mpBrickController=ctrl;});
+  }
+
+  function closePayModal(){document.getElementById('payOverlay').classList.remove('active');document.body.style.overflow='';if(mpBrickController){mpBrickController.unmount();mpBrickController=null;}document.getElementById('paymentBrick_container').innerHTML='';}
+
+  function checkoutWPP(){
+    if(!cart.length) return;
+    var lines=cart.map(function(i){return '• '+i.title+' | '+i.color+' | Tam. '+i.size+' | Qtd: '+i.quantity;});
+    var total=cart.reduce(function(s,i){return s+i.price*i.quantity;},0);
+    var msg='Olá! Quero fazer um pedido:\n\n'+lines.join('\n')+'\n\nTotal: R$ '+total.toFixed(2).replace('.',',');
+    window.open('https://wa.me/'+WPP+'?text='+encodeURIComponent(msg),'_blank');
+  }
+
+  function copyPix(){var c=document.getElementById('pixCode');if(!c)return;navigator.clipboard.writeText(c.textContent).then(function(){showToast('Código Pix copiado!');});}
+
+  function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+
+  renderCatalog();
+</script>
+</body>
+</html>
