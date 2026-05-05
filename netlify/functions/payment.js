@@ -1,4 +1,6 @@
 const ACCESS_TOKEN = 'APP_USR-847572925562157-050415-10a68a81e0bc42b71175e43a109fdc41-218917038';
+const OWNER_PHONE = '5516994451494';
+const CALLMEBOT_APIKEY = '5575580';
 
 exports.handler = async function(event) {
   const headers = {
@@ -13,9 +15,27 @@ exports.handler = async function(event) {
 
   try {
     const body = JSON.parse(event.body);
-    const { action, cartItems, paymentData } = body;
+    const { action, cartItems, paymentData, orderData } = body;
 
-    // ── Criar preferência ──────────────────────────────────
+    // ── Notificar lojista via CallMeBot ───────────────────────
+    if (action === 'notify_owner') {
+      const lines = orderData.items.map(i =>
+        `- ${i.title} | ${i.color} | Tam. ${i.size} | Qtd: ${i.quantity}`
+      ).join('%0A');
+
+      const msg = encodeURIComponent(
+        `NOVO PEDIDO #${orderData.id}\n` +
+        `Data: ${orderData.date}\n` +
+        `Total: ${orderData.total}\n\n` +
+        `Itens:\n`
+      ) + lines + encodeURIComponent('\n\nPagamento confirmado via Mercado Pago.');
+
+      const url = `https://api.callmebot.com/whatsapp.php?phone=${OWNER_PHONE}&text=${msg}&apikey=${CALLMEBOT_APIKEY}`;
+      await fetch(url);
+      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
+    }
+
+    // ── Criar preferência ─────────────────────────────────────
     if (action === 'create_preference') {
       const items = cartItems.map(item => ({
         id: `${item.id}-${item.color}-${item.size}`,
@@ -52,7 +72,7 @@ exports.handler = async function(event) {
       return { statusCode: 200, headers, body: JSON.stringify({ success: true, preferenceId: data.id }) };
     }
 
-    // ── Processar pagamento ────────────────────────────────
+    // ── Processar pagamento ───────────────────────────────────
     if (action === 'process_payment') {
       const response = await fetch('https://api.mercadopago.com/v1/payments', {
         method: 'POST',
