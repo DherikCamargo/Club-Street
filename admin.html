@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Club Street – Admin</title>
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:Arial,sans-serif; background:#0f0f0f; color:#fff; min-height:100vh; }
+    .login { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+    .login-box { background:#1a1a1a; border:1px solid #2b2b2b; border-radius:16px; padding:32px; width:min(360px,90vw); }
+    .login-box h2 { text-align:center; margin-bottom:24px; font-size:1.2rem; }
+    .login-box input { width:100%; padding:12px 14px; background:#111; border:1px solid #333; border-radius:10px; color:#fff; font-size:.95rem; margin-bottom:14px; }
+    .login-box button { width:100%; padding:13px; background:#25D366; border:none; border-radius:10px; color:#fff; font-weight:700; cursor:pointer; font-size:1rem; }
+    .admin { display:none; }
+    .topbar { background:#161616; border-bottom:1px solid #222; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; }
+    .topbar h1 { font-size:1rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    .logout-btn { background:none; border:1px solid #333; border-radius:8px; color:#aaa; padding:8px 14px; cursor:pointer; font-size:.85rem; }
+    .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; padding:16px; }
+    .stat-card { background:#1a1a1a; border:1px solid #2b2b2b; border-radius:12px; padding:16px; text-align:center; }
+    .stat-card .num { font-size:1.8rem; font-weight:900; margin-bottom:4px; }
+    .stat-card .lbl { font-size:.78rem; color:#aaa; text-transform:uppercase; letter-spacing:.08em; }
+    .orders-section { padding:0 16px 16px; }
+    .orders-section h2 { font-size:.85rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#aaa; margin-bottom:12px; }
+    .filter-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+    .tab { padding:7px 14px; border-radius:999px; border:1px solid #333; background:none; color:#aaa; cursor:pointer; font-size:.82rem; transition:all .15s; }
+    .tab.active { background:#fff; color:#111; border-color:#fff; font-weight:700; }
+    .order-card { background:#1a1a1a; border:1px solid #2b2b2b; border-radius:12px; margin-bottom:12px; overflow:hidden; }
+    .order-hdr { padding:12px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #222; flex-wrap:wrap; gap:8px; }
+    .order-hdr strong { font-size:.88rem; color:#ccc; }
+    .status-badge { font-size:.72rem; font-weight:700; padding:4px 10px; border-radius:999px; }
+    .status-badge.pending   { background:#3a3010; color:#f5c518; }
+    .status-badge.approved  { background:#1a3a2a; color:#25D366; }
+    .status-badge.shipped   { background:#102a3a; color:#009ee3; }
+    .status-badge.delivered { background:#1a1a3a; color:#a78bfa; }
+    .order-items { padding:10px 16px; font-size:.82rem; color:#bbb; display:flex; flex-direction:column; gap:4px; }
+    .order-foot { padding:10px 16px; border-top:1px solid #222; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+    .order-total { font-weight:700; font-size:.9rem; }
+    .status-select { padding:7px 10px; background:#111; border:1px solid #333; border-radius:8px; color:#fff; font-size:.82rem; cursor:pointer; }
+    .update-btn { padding:7px 14px; background:#009ee3; border:none; border-radius:8px; color:#fff; font-weight:700; font-size:.82rem; cursor:pointer; }
+    .update-btn:hover { background:#007cc1; }
+    .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px); background:#25D366; color:#fff; padding:10px 20px; border-radius:10px; font-weight:600; font-size:.88rem; transition:transform .3s; pointer-events:none; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .empty { text-align:center; color:#555; padding:40px; font-size:.9rem; }
+    .loading { text-align:center; color:#555; padding:40px; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="loginScreen">
+  <div class="login-box">
+    <h2>🔐 Club Street Admin</h2>
+    <input type="password" id="adminKey" placeholder="Senha admin" />
+    <button onclick="doLogin()">Entrar</button>
+    <p id="loginError" style="color:#ff4d4d;font-size:.8rem;margin-top:10px;text-align:center;"></p>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div class="admin" id="adminPanel">
+  <div class="topbar">
+    <h1>Club Street – Pedidos</h1>
+    <button class="logout-btn" onclick="doLogout()">Sair</button>
+  </div>
+
+  <div class="stats" id="statsArea"></div>
+
+  <div class="orders-section">
+    <h2>Pedidos</h2>
+    <div class="filter-tabs">
+      <button class="tab active" onclick="filterOrders('all',this)">Todos</button>
+      <button class="tab" onclick="filterOrders('pending',this)">Pendente</button>
+      <button class="tab" onclick="filterOrders('approved',this)">Pago</button>
+      <button class="tab" onclick="filterOrders('shipped',this)">A caminho</button>
+      <button class="tab" onclick="filterOrders('delivered',this)">Entregue</button>
+    </div>
+    <div id="ordersList"><div class="loading">Carregando...</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  var ADMIN_KEY = '';
+  var allOrders = [];
+  var currentFilter = 'all';
+
+  var STATUS_MAP = {
+    pending:   { label: 'Pendente',   cls: 'pending' },
+    approved:  { label: 'Pago',       cls: 'approved' },
+    shipped:   { label: 'A caminho',  cls: 'shipped' },
+    delivered: { label: 'Entregue',   cls: 'delivered' }
+  };
+
+  function doLogin() {
+    var key = document.getElementById('adminKey').value.trim();
+    if (key === 'clubstreet2025admin') {
+      ADMIN_KEY = key;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      loadOrders();
+    } else {
+      document.getElementById('loginError').textContent = 'Senha incorreta.';
+    }
+  }
+
+  document.getElementById('adminKey').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  function doLogout() {
+    ADMIN_KEY = '';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('adminKey').value = '';
+  }
+
+  function loadOrders() {
+    fetch('/.netlify/functions/payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get_all_orders', adminKey: ADMIN_KEY })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.success) {
+        allOrders = res.orders || [];
+        renderStats();
+        renderOrders();
+      }
+    })
+    .catch(function() { document.getElementById('ordersList').innerHTML = '<div class="empty">Erro ao carregar pedidos.</div>'; });
+  }
+
+  function renderStats() {
+    var total = allOrders.length;
+    var pending  = allOrders.filter(function(o){ return o.status==='pending'; }).length;
+    var shipped  = allOrders.filter(function(o){ return o.status==='shipped'; }).length;
+    var delivered= allOrders.filter(function(o){ return o.status==='delivered'; }).length;
+    var revenue  = allOrders
+      .filter(function(o){ return o.status!=='pending'; })
+      .reduce(function(s,o){ return s + parseFloat((o.total||'').replace('R$ ','').replace(',','.')); }, 0);
+
+    document.getElementById('statsArea').innerHTML =
+      stat(total, 'Total de pedidos', '#fff') +
+      stat(pending, 'Pendentes', '#f5c518') +
+      stat(shipped, 'A caminho', '#009ee3') +
+      stat(delivered, 'Entregues', '#a78bfa') +
+      stat('R$ '+revenue.toFixed(2).replace('.',','), 'Receita', '#25D366');
+  }
+
+  function stat(num, lbl, color) {
+    return '<div class="stat-card"><div class="num" style="color:'+color+'">'+num+'</div><div class="lbl">'+lbl+'</div></div>';
+  }
+
+  function filterOrders(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    btn.classList.add('active');
+    renderOrders();
+  }
+
+  function renderOrders() {
+    var filtered = currentFilter === 'all' ? allOrders : allOrders.filter(function(o){ return o.status === currentFilter; });
+    var el = document.getElementById('ordersList');
+    if (filtered.length === 0) { el.innerHTML = '<div class="empty">Nenhum pedido encontrado.</div>'; return; }
+    el.innerHTML = '';
+    filtered.forEach(function(order) {
+      var si = STATUS_MAP[order.status] || { label: order.status, cls: 'pending' };
+      var items = Array.isArray(order.items) ? order.items : [];
+      var itemsHtml = items.map(function(i){ return '• '+i.title+' | '+i.color+' | Tam. '+i.size+' | Qtd: '+i.quantity; }).join('<br>');
+
+      var div = document.createElement('div');
+      div.className = 'order-card';
+      div.innerHTML =
+        '<div class="order-hdr">'+
+          '<strong>Pedido #'+order.id+' &nbsp;•&nbsp; '+order.date+'</strong>'+
+          '<span class="status-badge '+si.cls+'">'+si.label+'</span>'+
+        '</div>'+
+        '<div class="order-items">'+itemsHtml+'</div>'+
+        '<div class="order-foot">'+
+          '<span class="order-total">'+order.total+'</span>'+
+          '<div style="display:flex;gap:8px;align-items:center;">'+
+            '<select class="status-select" id="sel-'+order.id+'">'+
+              Object.keys(STATUS_MAP).map(function(k){
+                return '<option value="'+k+'"'+(order.status===k?' selected':'')+'>'+STATUS_MAP[k].label+'</option>';
+              }).join('')+
+            '</select>'+
+            '<button class="update-btn" onclick="updateStatus(\''+order.id+'\')">Salvar</button>'+
+          '</div>'+
+        '</div>';
+      el.appendChild(div);
+    });
+  }
+
+  function updateStatus(orderId) {
+    var select = document.getElementById('sel-'+orderId);
+    var newStatus = select.value;
+    fetch('/.netlify/functions/payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update_status', orderId: orderId, status: newStatus, adminKey: ADMIN_KEY })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (res.success) {
+        var order = allOrders.find(function(o){ return o.id === orderId; });
+        if (order) order.status = newStatus;
+        renderStats();
+        renderOrders();
+        showToast('Status atualizado!');
+      } else {
+        showToast('Erro ao atualizar.');
+      }
+    });
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2500);
+  }
+
+  // Atualiza a cada 60 segundos
+  setInterval(function(){ if(ADMIN_KEY) loadOrders(); }, 60000);
+</script>
+</body>
+</html>
