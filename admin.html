@@ -117,7 +117,7 @@
   }
 
   function loadOrders() {
-    fetch('/.netlify/functions/payment', {
+    fetch('/api/payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'get_all_orders', adminKey: ADMIN_KEY })
@@ -197,7 +197,7 @@
   function updateStatus(orderId) {
     var select = document.getElementById('sel-'+orderId);
     var newStatus = select.value;
-    fetch('/.netlify/functions/payment', {
+    fetch('/api/payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'update_status', orderId: orderId, status: newStatus, adminKey: ADMIN_KEY })
