@@ -640,7 +640,7 @@
     var btn=document.getElementById('mpBtn'); btn.disabled=true; btn.textContent='Aguarde...';
     var payload=cart.map(function(i){return{id:i.id,title:i.title,color:i.color,size:i.size,price:i.price,quantity:i.quantity};});
     var total=cart.reduce(function(s,i){return s+i.price*i.quantity;},0);
-    fetch('/.netlify/functions/payment', {
+    fetch('/api/payment', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({action:'create_preference',cartItems:payload})
@@ -665,7 +665,7 @@
         onReady:function(){},
         onSubmit:function(data){
           return new Promise(function(resolve,reject){
-            fetch('/.netlify/functions/payment',{
+            fetch('/api/payment',{
               method:'POST',
               headers:{'Content-Type':'application/json'},
               body:JSON.stringify({action:'process_payment',paymentData:data.formData})
@@ -816,7 +816,7 @@
   function saveOrder(orderData) {
     // Salva no Supabase via Netlify Function
     orderData.customerId = customerId;
-    fetch('/.netlify/functions/payment', {
+    fetch('/api/payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'save_order', orderData: orderData })
@@ -842,7 +842,7 @@
     var body = document.getElementById('ordersBody');
     body.innerHTML = '<div class="orders-empty">Carregando pedidos...</div>';
     // Busca do Supabase
-    fetch('/.netlify/functions/payment', {
+    fetch('/api/payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'get_orders', customerId: customerId })
@@ -913,7 +913,7 @@
   // ── Notificação automática para o lojista ──────────────────
   function notifyOwner(order) {
     // Envia notificação direto para o WhatsApp do lojista via CallMeBot (sem abrir WhatsApp do cliente)
-    fetch('/.netlify/functions/payment', {
+    fetch('/api/payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'notify_owner', orderData: order })
