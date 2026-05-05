@@ -64,6 +64,49 @@
     .card-sw.light { border-color:#888; }
     .card-sw.active { border:2px solid #fff; }
 
+    /* ── MENU LATERAL ── */
+    .menu-btn { background:none; border:none; color:#fff; cursor:pointer; padding:4px; display:flex; flex-direction:column; gap:5px; justify-content:center; }
+    .menu-btn span { display:block; width:22px; height:2px; background:#fff; border-radius:2px; transition:all .3s; }
+    .menu-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:400; }
+    .menu-overlay.active { display:block; }
+    .menu-drawer { position:fixed; top:0; left:0; bottom:0; width:min(280px,80vw); background:#161616; border-right:1px solid #2b2b2b; z-index:401; transform:translateX(-100%); transition:transform .3s ease; display:flex; flex-direction:column; }
+    .menu-drawer.open { transform:translateX(0); }
+    .menu-hdr { padding:20px 16px; border-bottom:1px solid #222; display:flex; align-items:center; justify-content:space-between; }
+    .menu-hdr strong { font-size:1rem; letter-spacing:.08em; text-transform:uppercase; }
+    .menu-x { background:none; border:none; color:#fff; font-size:1.4rem; cursor:pointer; }
+    .menu-section { padding:8px 0; border-bottom:1px solid #1e1e1e; }
+    .menu-section-title { padding:12px 20px 6px; font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+    .menu-item { display:flex; align-items:center; gap:12px; padding:13px 20px; color:#ddd; font-size:.95rem; cursor:pointer; transition:background .15s; border:none; background:none; width:100%; text-align:left; }
+    .menu-item:hover { background:#1e1e1e; color:#fff; }
+    .menu-item svg { flex-shrink:0; opacity:.7; }
+    .menu-item.active { color:#fff; }
+
+    /* ── MEUS PEDIDOS ── */
+    .orders-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:500; align-items:flex-start; justify-content:center; padding:0; overflow-y:auto; }
+    .orders-overlay.active { display:flex; }
+    .orders-shell { width:min(600px,100vw); min-height:100vh; background:#111; display:flex; flex-direction:column; }
+    .orders-hdr { position:sticky; top:0; background:#161616; border-bottom:1px solid #222; padding:16px 18px; display:flex; align-items:center; gap:12px; z-index:2; }
+    .orders-back { background:none; border:none; color:#fff; font-size:1.4rem; cursor:pointer; }
+    .orders-hdr h2 { margin:0; font-size:1rem; font-weight:700; }
+    .orders-body { padding:16px; flex:1; display:flex; flex-direction:column; gap:14px; }
+    .orders-empty { text-align:center; color:var(--muted); padding:60px 20px; font-size:.95rem; }
+    .order-card { background:#1a1a1a; border:1px solid #2b2b2b; border-radius:14px; overflow:hidden; }
+    .order-card-hdr { padding:14px 16px; border-bottom:1px solid #222; display:flex; align-items:center; justify-content:space-between; }
+    .order-card-hdr strong { font-size:.85rem; color:var(--muted); }
+    .order-status { font-size:.75rem; font-weight:700; padding:4px 10px; border-radius:999px; }
+    .order-status.approved { background:#1a3a2a; color:#25D366; }
+    .order-status.pending { background:#3a3010; color:#f5c518; }
+    .order-items { padding:12px 16px; display:flex; flex-direction:column; gap:10px; }
+    .order-item { display:flex; gap:10px; align-items:center; }
+    .order-item img { width:52px; height:52px; border-radius:8px; object-fit:cover; flex-shrink:0; }
+    .order-item-info { flex:1; }
+    .order-item-info strong { display:block; font-size:.88rem; }
+    .order-item-info span { color:var(--muted); font-size:.78rem; }
+    .order-total { padding:10px 16px; border-top:1px solid #222; display:flex; justify-content:space-between; font-size:.88rem; }
+    .order-total strong { color:#fff; }
+    .order-track-btn { margin:0 16px 16px; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border:1.5px solid var(--green); border-radius:10px; background:transparent; color:var(--green); font-weight:700; font-size:.88rem; cursor:pointer; transition:background .2s; width:calc(100% - 32px); }
+    .order-track-btn:hover { background:rgba(37,211,102,.1); }
+
     /* GUIA DE MEDIDAS MODAL */
     .guide-btn {
       display:inline-flex; align-items:center; gap:10px;
@@ -171,7 +214,12 @@
 
 <div class="topbar">
   <div class="topbar-inner">
-    <div class="brand">Club Street</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-btn" onclick="openMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="brand">Club Street</div>
+    </div>
     <div class="topbar-actions">
       <a class="mini-btn" href="https://wa.me/5516994451494" target="_blank" rel="noopener">WhatsApp</a>
       <button class="cart-btn" onclick="openCart()">
@@ -283,6 +331,50 @@
   </div>
 </div>
 
+<!-- MENU LATERAL -->
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+<div class="menu-drawer" id="menuDrawer">
+  <div class="menu-hdr">
+    <strong>Club Street</strong>
+    <button class="menu-x" onclick="closeMenu()">×</button>
+  </div>
+  <div class="menu-section">
+    <div class="menu-section-title">Categoria</div>
+    <button class="menu-item" onclick="filterCategory('masculino')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+      Masculino
+    </button>
+    <button class="menu-item" onclick="filterCategory('feminino')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+      Feminino
+    </button>
+    <button class="menu-item" onclick="filterCategory('todos')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Ver Todos
+    </button>
+  </div>
+  <div class="menu-section">
+    <div class="menu-section-title">Minha Conta</div>
+    <button class="menu-item" onclick="openOrders()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Meus Pedidos
+    </button>
+  </div>
+</div>
+
+<!-- MEUS PEDIDOS -->
+<div class="orders-overlay" id="ordersOverlay">
+  <div class="orders-shell">
+    <div class="orders-hdr">
+      <button class="orders-back" onclick="closeOrders()">‹</button>
+      <h2>Meus Pedidos</h2>
+    </div>
+    <div class="orders-body" id="ordersBody">
+      <div class="orders-empty">Você ainda não tem pedidos.<br>Finalize uma compra para vê-la aqui!</div>
+    </div>
+  </div>
+</div>
+
 <!-- GUIA DE MEDIDAS -->
 <div class="guide-overlay" id="guideOverlay" onclick="outsideGuide(event)">
   <div class="guide-shell">
@@ -304,6 +396,9 @@
   var WPP  = '5516994451494';
   var PRICES = { teste: 1.00 };
   var MP_PUBLIC_KEY = 'APP_USR-a9583197-4c3a-4235-ba44-a043bdef284b';
+
+  // Categorias: feminino = snipe, rosa, creeping | masculino = anjo, peace, never, staypositive
+  var FEMININE = ['snipe','rosa','creeping'];
 
   var PRODUCTS = [
     { id:'snipe', title:'Camiseta Snipe', price:'R$ 69,90', sizes:['P','M','G','GG'], colors:[
@@ -372,7 +467,13 @@
   function renderCatalog() {
     var grid = document.getElementById('catalogGrid');
     grid.innerHTML = '';
-    PRODUCTS.forEach(function(p) {
+    var filtered = PRODUCTS.filter(function(p) {
+      if(p.id === 'teste') return true; // produto teste sempre aparece
+      if(currentFilter === 'feminino') return FEMININE.indexOf(p.id) !== -1;
+      if(currentFilter === 'masculino') return FEMININE.indexOf(p.id) === -1;
+      return true;
+    });
+    filtered.forEach(function(p) {
       var fc = p.colors[0];
       var article = document.createElement('article');
       article.className = 'card';
@@ -561,8 +662,21 @@
             .then(function(res){
                 container.innerHTML=''; result.style.display='block';
                 if(res.success&&res.status==='approved'){
+                  // Salva pedido e notifica lojista
+                  var orderId = Date.now().toString().slice(-6);
+                  var orderDate = new Date().toLocaleDateString('pt-BR');
+                  var orderTotal = 'R$ '+cart.reduce(function(s,i){return s+i.price*i.quantity;},0).toFixed(2).replace('.',',');
+                  var orderData = {
+                    id: orderId,
+                    date: orderDate,
+                    total: orderTotal,
+                    status: 'approved',
+                    items: cart.map(function(i){return{title:i.title,color:i.color,size:i.size,quantity:i.quantity,image:i.image};})
+                  };
+                  saveOrder(orderData);
+                  notifyOwner(orderData);
                   result.className='pay-result approved';
-                  result.innerHTML='🎉 '+res.message+'<br><small>Entraremos em contato em breve!</small>';
+                  result.innerHTML='🎉 Pagamento aprovado!<br><small>Pedido #'+orderId+' salvo! Acesse <strong>Menu → Meus Pedidos</strong> para acompanhar.</small>';
                   cart=[];updateBadge();
                 } else if(res.success&&res.status==='pix'){
                   result.className='pay-result pending';
@@ -614,6 +728,119 @@
   }
 
   function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+
+  // ── Menu ───────────────────────────────────────────────────
+  function openMenu() {
+    document.getElementById('menuOverlay').classList.add('active');
+    document.getElementById('menuDrawer').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMenu() {
+    document.getElementById('menuOverlay').classList.remove('active');
+    document.getElementById('menuDrawer').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // ── Filtro por categoria ────────────────────────────────────
+  var currentFilter = 'todos';
+  function filterCategory(cat) {
+    currentFilter = cat;
+    closeMenu();
+    renderCatalog();
+    // Update catalog label
+    var label = document.querySelector('.catalog-label');
+    if(cat === 'masculino') label.textContent = 'Masculino';
+    else if(cat === 'feminino') label.textContent = 'Feminino';
+    else label.textContent = 'Coleção';
+    window.scrollTo({top: document.querySelector('.catalog-label').offsetTop - 60, behavior:'smooth'});
+  }
+
+  // ── Meus Pedidos ────────────────────────────────────────────
+  function saveOrder(orderData) {
+    var orders = JSON.parse(localStorage.getItem('cs_orders') || '[]');
+    orders.unshift(orderData);
+    localStorage.setItem('cs_orders', JSON.stringify(orders));
+  }
+
+  function openOrders() {
+    closeMenu();
+    renderOrders();
+    document.getElementById('ordersOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeOrders() {
+    document.getElementById('ordersOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function renderOrders() {
+    var orders = JSON.parse(localStorage.getItem('cs_orders') || '[]');
+    var body = document.getElementById('ordersBody');
+    if(orders.length === 0) {
+      body.innerHTML = '<div class="orders-empty">Você ainda não tem pedidos.<br>Finalize uma compra para vê-la aqui!</div>';
+      return;
+    }
+    body.innerHTML = '';
+    orders.forEach(function(order) {
+      var itemsHtml = order.items.map(function(item) {
+        return '<div class="order-item">'+
+          '<img src="'+item.image+'" alt="'+item.title+'" loading="lazy">'+
+          '<div class="order-item-info">'+
+            '<strong>'+item.title+'</strong>'+
+            '<span>'+item.color+' • Tam. '+item.size+' • Qtd: '+item.quantity+'</span>'+
+          '</div>'+
+        '</div>';
+      }).join('');
+
+      var statusLabel = order.status === 'approved' ? 'Pago' : 'Pendente';
+      var statusClass = order.status === 'approved' ? 'approved' : 'pending';
+
+      var div = document.createElement('div');
+      div.className = 'order-card';
+      div.innerHTML =
+        '<div class="order-card-hdr">'+
+          '<strong>Pedido #'+order.id+' • '+order.date+'</strong>'+
+          '<span class="order-status '+statusClass+'">'+statusLabel+'</span>'+
+        '</div>'+
+        '<div class="order-items">'+itemsHtml+'</div>'+
+        '<div class="order-total"><span>Total</span><strong>'+order.total+'</strong></div>'+
+        '<button class="order-track-btn" data-orderid="'+order.id+'">'+
+          '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.528 5.847L0 24l6.335-1.652A11.954 11.954 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.006-1.373l-.36-.213-3.727.977.994-3.634-.234-.373A9.818 9.818 0 0 1 2.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg>'+
+          'Pedir código de rastreio e nota do pedido'+
+        '</button>';
+
+      div.querySelector('.order-track-btn').addEventListener('click', function() {
+        var msg = 'Olá! Gostaria de solicitar o código de rastreio e nota fiscal do meu Pedido #'+order.id+'.';
+        window.open('https://wa.me/'+WPP+'?text='+encodeURIComponent(msg), '_blank');
+      });
+
+      body.appendChild(div);
+    });
+  }
+
+  // ── Notificação automática para o lojista ──────────────────
+  function notifyOwner(order) {
+    var lines = order.items.map(function(i) {
+      return '• '+i.title+' | '+i.color+' | Tam. '+i.size+' | Qtd: '+i.quantity;
+    });
+    var msg = '🛍️ *NOVO PEDIDO RECEBIDO!*
+
+'+
+      '📦 Pedido #'+order.id+'
+'+
+      '📅 '+order.date+'
+'+
+      '💰 Total: '+order.total+'
+
+'+
+      '*Itens:*
+'+lines.join('
+')+'
+
+'+
+      '✅ Pagamento confirmado via Mercado Pago.';
+    window.open('https://wa.me/'+WPP+'?text='+encodeURIComponent(msg), '_blank');
+  }
 
   renderCatalog();
 </script>
