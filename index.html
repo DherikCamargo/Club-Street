@@ -462,6 +462,7 @@
   var currentProduct = null, selectedColor = null, selectedSize = 'P';
   var cart = [], mpBrickController = null;
   var LIGHT = ['#FFFFFF','#ECE7DE','#F5F5F5'];
+  var currentFilter = 'todos';
 
   // ── Catálogo ───────────────────────────────────────────────
   function renderCatalog() {
@@ -742,7 +743,6 @@
   }
 
   // ── Filtro por categoria ────────────────────────────────────
-  var currentFilter = 'todos';
   function filterCategory(cat) {
     currentFilter = cat;
     closeMenu();
@@ -821,25 +821,17 @@
   // ── Notificação automática para o lojista ──────────────────
   function notifyOwner(order) {
     var lines = order.items.map(function(i) {
-      return '• '+i.title+' | '+i.color+' | Tam. '+i.size+' | Qtd: '+i.quantity;
+      return '- '+i.title+' | '+i.color+' | Tam. '+i.size+' | Qtd: '+i.quantity;
     });
-    var msg = '🛍️ *NOVO PEDIDO RECEBIDO!*
-
-'+
-      '📦 Pedido #'+order.id+'
-'+
-      '📅 '+order.date+'
-'+
-      '💰 Total: '+order.total+'
-
-'+
-      '*Itens:*
-'+lines.join('
-')+'
-
-'+
-      '✅ Pagamento confirmado via Mercado Pago.';
-    window.open('https://wa.me/'+WPP+'?text='+encodeURIComponent(msg), '_blank');
+    var nl = '%0A';
+    var msg = encodeURIComponent('NOVO PEDIDO RECEBIDO!') + nl +
+      encodeURIComponent('Pedido #'+order.id) + nl +
+      encodeURIComponent('Data: '+order.date) + nl +
+      encodeURIComponent('Total: '+order.total) + nl + nl +
+      encodeURIComponent('Itens:') + nl +
+      lines.map(function(l){ return encodeURIComponent(l); }).join(nl) + nl + nl +
+      encodeURIComponent('Pagamento confirmado via Mercado Pago.');
+    window.open('https://wa.me/'+WPP+'?text='+msg, '_blank');
   }
 
   renderCatalog();
